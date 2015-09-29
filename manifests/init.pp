@@ -3,6 +3,7 @@ class omegaup (
 	$user = 'vagrant',
 	$mysql_user = 'omegaup',
 	$mysql_host = 'localhost',
+	$services_ensure = running,
 ) {
 	# Definitions
 	define config_php($mysql_db) {
@@ -98,7 +99,9 @@ class omegaup (
 		mysql_db => 'omegaup',
 		require => Vcsrepo[$root],
 	}
-	class { 'nginx': }
+	class { 'nginx':
+		service_ensure => $services_ensure,
+	}
 	nginx::resource::vhost { 'localhost':
 		ensure        => present,
 		listen_port   => 80,
@@ -121,7 +124,7 @@ class omegaup (
 		}
 	}
 	service { 'hhvm':
-		ensure  => running,
+		ensure  => $services_ensure,
 		enable  => true,
 		require => Package['hhvm'],
 	}

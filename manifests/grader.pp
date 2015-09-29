@@ -1,6 +1,7 @@
 class omegaup::grader (
 	$root = '/opt/omegaup',
-	$user = 'vagrant'
+	$user = 'vagrant',
+	$services_ensure = running,
 ) {
 	file { "${root}/bin/omegaup.jks":
 		source  => "${root}/backend/grader/omegaup.jks",
@@ -47,7 +48,7 @@ class omegaup::grader (
 		require => File['/var/lib/omegaup'],
 	}
 	service { 'omegaup':
-		ensure  => running,
+		ensure  => $services_ensure,
 		enable  => true,
 		provider => 'systemd',
 		require => [File['/etc/systemd/system/omegaup.service'],

@@ -1,6 +1,6 @@
 class omegaup::database (
 	$root_password,
-	$password
+	$password,
 ) {
 	class { '::mysql::server':
 		root_password => $root_password,
