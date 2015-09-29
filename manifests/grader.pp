@@ -7,7 +7,7 @@ class omegaup::grader (
 	$services_ensure = running,
 ) {
 	# Packages
-	package { ['openjdk-8-jdk', 'libjava-mysql']:
+	package { ['libjava-mysql']:
 		ensure  => present,
 	}
 	file { "${root}/bin/omegaup.jks":
