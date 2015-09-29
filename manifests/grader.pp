@@ -1,8 +1,15 @@
 class omegaup::grader (
 	$root = '/opt/omegaup',
 	$user = 'vagrant',
+	$mysql_user = 'omegaup',
+	$mysql_db = 'omegaup',
+	$mysql_host = 'localhost',
 	$services_ensure = running,
 ) {
+	# Packages
+	package { ['openjdk-8-jdk', 'libjava-mysql']:
+		ensure  => present,
+	}
 	file { "${root}/bin/omegaup.jks":
 		source  => "${root}/backend/grader/omegaup.jks",
 		require => Exec['certmanager'],
@@ -54,6 +61,7 @@ class omegaup::grader (
 		require => [File['/etc/systemd/system/omegaup.service'],
 								Exec['grade-directory'],
 								File["${root}/bin/omegaup.jks"],
-								File["${root}/bin/omegaup.conf"]],
+								File["${root}/bin/omegaup.conf"],
+								Package['libjava-mysql']],
 	}
 }

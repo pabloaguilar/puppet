@@ -13,8 +13,8 @@
 	},
 	"db": {
 		"driver": "com.mysql.jdbc.Driver",
-		"url": "jdbc:mysql://localhost/omegaup?autoReconnect=true",
-		"user": "omegaup",
+		"url": "jdbc:mysql://<%= @mysql_host %>/<%= @mysql_db %>?autoReconnect=true",
+		"user": "<%= @mysql_user %>",
 		"password": "<%= @mysql_password %>"
 	},
 	"common": {
