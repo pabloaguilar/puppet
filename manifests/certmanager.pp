@@ -18,7 +18,7 @@ class omegaup::certmanager (
 	exec { "certmanager-ca":
 		command => "/usr/bin/certmanager init --root '${::omegaup::certmanager::ssl_root}' --ca-name '${ca_name}' --country '${country}'",
 		creates => "${::omegaup::certmanager::ssl_root}/ca.crt",
-		requires => [File['/usr/bin/certmanager'], Package['openjdk-8-jdk'],
+		require => [File['/usr/bin/certmanager'], Package['openjdk-8-jdk'],
 		             File[$::omegaup::certmanager::ssl_root]],
 	}
 }

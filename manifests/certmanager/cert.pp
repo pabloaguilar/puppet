@@ -7,6 +7,6 @@ define omegaup::certmanager::cert (
 	exec { "certmanager-${title}":
 		command => "/usr/bin/certmanager cert --root '${omegaup::certmanager::ssl_root}' --country '${country}' --hostname '${hostname}' --output '${title}' --password '${password}'",
 		creates => $title,
-		requires => [Exec['certmanager-ca'], Package['openjdk-8-jdk']],
+		require => [Exec['certmanager-ca'], Package['openjdk-8-jdk']],
 	}
 }
