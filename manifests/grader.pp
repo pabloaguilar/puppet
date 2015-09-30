@@ -1,6 +1,7 @@
 class omegaup::grader (
 	$root = '/opt/omegaup',
 	$user = 'vagrant',
+	$embedded_runner = 'true',
 	$mysql_user = 'omegaup',
 	$mysql_db = 'omegaup',
 	$mysql_host = 'localhost',
