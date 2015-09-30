@@ -62,12 +62,10 @@ class omegaup (
 		group   => $user,
 		require => Vcsrepo[$root],
 	}
-	exec { 'certmanager':
-		command => "${root}/bin/certmanager init --password ${keystore_password}",
-		user    => $user,
-		group   => $user,
-		creates => "${root}/ssl",
-		require => [Vcsrepo[$root], Package['openjdk-8-jdk']],
+	class { '::omegaup::certmanager': }
+  omegaup::certmanager::cert { "${root}/frontend/omegaup.pem":
+		hostname => 'localhost',
+		require  => Vcsrepo[$root],
 	}
 
 	# Web application

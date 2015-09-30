@@ -1,0 +1,162 @@
+#!/bin/bash -e
+
+PASSWORD=omegaup
+C=MX
+CA_NAME=
+HOSTNAME=
+IP_ADDR=0
+OUTPUT=
+ROOT=ssl
+
+usage() {
+	echo "$0 <command> [options]"
+	echo -e "\tWhere <command> is one of:"
+	echo -e "\t\tinit\tInitializes the certificate authority. Requires --ca-name."
+	echo -e "\t\tcert\tCreates a cert truststore. Requires --hostname and --output."
+	echo -e "\tWhere [options] are one or more of:"
+	echo -e "\t\t--root\tSets the path where the ca.crt and ca.seq files are stored"
+	echo -e "\t\t--password\tSets the store password"
+	echo -e "\t\t--ca-name\tSets the Certificate Authority name"
+	echo -e "\t\t--country\tSets the country"
+	echo -e "\t\t--hostname\tSets the hostname of the cert"
+	echo -e "\t\t--output\tSets the output of the jks file"
+
+	exit 1
+}
+
+gen_cert() {
+	CN=$1
+	TARGET=$2
+	FORMAT=${TARGET##*.}
+	DIR=`mktemp -d`
+
+	if [ -f $TARGET ]; then rm $TARGET; fi
+
+	/usr/bin/openssl genrsa -out $DIR/cert.key 2048
+	if [ $IP_ADDR -eq 1 ]; then
+		/usr/bin/openssl req -new -key $DIR/cert.key -out $DIR/cert.csr \
+			-config <(
+cat <<EOF
+[req]
+default_bits=2048
+prompt=no
+default_md=sha1
+req_extensions=req_ext
+distinguished_name=dn
+[dn]
+C=$C
+CN=$CN
+[req_ext]
+subjectAltName=IP:$CN
+EOF
+		)
+	else
+		/usr/bin/openssl req -new -subj "/C=$C/CN=$CN" -key $DIR/cert.key \
+			-out $DIR/cert.csr
+	fi
+
+	if [ $IP_ADDR -eq 1 ]; then
+		/usr/bin/openssl x509 -req -days 3650 -in $DIR/cert.csr -CA $ROOT/ca.crt \
+			-CAcreateserial -CAkey $ROOT/ca.key -out $DIR/cert.crt \
+			-extensions req_ext -extfile <(
+cat <<EOF
+[req_ext]
+subjectAltName=IP:$CN
+EOF
+		)
+	else
+		/usr/bin/openssl x509 -req -days 3650 -in $DIR/cert.csr -CA $ROOT/ca.crt \
+			-CAcreateserial -CAkey $ROOT/ca.key -out $DIR/cert.crt
+	fi
+
+	if [ "$FORMAT" == "jks" ]; then
+		CA_NAME=$(openssl x509 -in $ROOT/ca.crt -noout -subject | \
+			sed -n '/^subject/s/^.*CN=//p')
+		/usr/bin/openssl pkcs12 -export -in $DIR/cert.crt \
+			-inkey $DIR/cert.key -name "$CN" -certfile $ROOT/ca.crt \
+			-caname "$CA_NAME" -password "pass:$PASSWORD" -out $DIR/cert.p12
+		/usr/bin/keytool -importkeystore -srckeystore $DIR/cert.p12 \
+			-srcstoretype pkcs12 -srcstorepass "$PASSWORD" -srcalias "$CN" \
+			-destkeystore $TARGET -deststoretype jks -deststorepass "$PASSWORD"
+		/usr/bin/keytool -importcert -alias "$CA_NAME" -noprompt \
+			-trustcacerts -keystore $TARGET -storepass "$PASSWORD" -file $ROOT/ca.crt
+	else
+		cat $DIR/cert.key $DIR/cert.crt $ROOT/ca.crt > $TARGET
+	fi
+
+	SERIAL=`openssl x509 -in $DIR/cert.crt -noout -serial | sed -e 's/serial=//'`
+
+	cp $DIR/cert.key $ROOT/${CN}-${SERIAL}.key
+	cp $DIR/cert.crt $ROOT/${CN}-${SERIAL}.crt
+
+	rm -rf $DIR
+}
+
+gen_ca() {
+	CN=$1
+	if [ -d $ROOT ]; then
+		rm $ROOT/*
+	else
+		mkdir $ROOT
+	fi
+	/usr/bin/openssl genrsa -out $ROOT/ca.key 4096
+	/usr/bin/openssl req -new -subj "/C=$C/CN=$CN" -x509 -days 3650 \
+		-key $ROOT/ca.key -out $ROOT/ca.crt
+}
+
+COMMAND=$1
+shift || usage
+
+while [[ $# > 1 ]]; do
+	KEY=$1
+	shift
+
+	case $KEY in
+		-p|--password)
+			PASSWORD="$1"
+			shift || usage
+			;;
+		-c|--ca-name)
+			CA_NAME="$1"
+			shift || usage
+			;;
+		-C|--country)
+			C="$1"
+			shift || usage
+			;;
+		-h|--hostname)
+			HOSTNAME="$1"
+			IP_ADDR=`echo $HOSTNAME | grep '^[0-9]\+\(\.[0-9]\+\)\{3\}$' | wc -l`
+			shift || usage
+			;;
+		-o|--output)
+			OUTPUT="$1"
+			shift || usage
+			;;
+		-r|--root)
+			ROOT="$1"
+			shift || usage
+			;;
+		*)
+			usage
+			;;
+	esac
+done
+
+case $COMMAND in
+	init)
+		if [ "$CA_NAME" == "" ]; then
+			usage
+		fi
+		gen_ca "$CA_NAME"
+		;;
+	cert)
+		if [ \( "$HOSTNAME" == "" \) -o \( "$OUTPUT" == "" \) ] ; then
+			usage
+		fi
+		gen_cert "$HOSTNAME" "$OUTPUT"
+		;;
+	*)
+		usage
+		;;
+esac

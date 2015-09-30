@@ -10,9 +10,9 @@ class omegaup::grader (
 	package { ['libmysql-java']:
 		ensure  => present,
 	}
-	file { "${root}/bin/omegaup.jks":
-		source  => "${root}/backend/grader/omegaup.jks",
-		require => Exec['certmanager'],
+	omegaup::certmanager::cert { "${root}/bin/omegaup.jks":
+		hostname => 'localhost',
+		require  => Vcsrepo[$root],
 	}
 	file { '/var/log/omegaup/service.log':
 		ensure  => 'file',
@@ -60,7 +60,7 @@ class omegaup::grader (
 		provider => 'systemd',
 		require => [File['/etc/systemd/system/omegaup.service'],
 								Exec['grade-directory'],
-								File["${root}/bin/omegaup.jks"],
+								Omegaup::Certmanager::Cert["${root}/bin/omegaup.jks"],
 								File["${root}/bin/omegaup.conf"],
 								Package['libmysql-java']],
 	}
