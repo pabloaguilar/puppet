@@ -30,7 +30,9 @@ gen_cert() {
 	FORMAT=${TARGET##*.}
 	DIR=`mktemp -d`
 
-	if [ -f $TARGET ]; then rm $TARGET; fi
+	if [ -f $TARGET ]; then
+		rm $TARGET
+	fi
 
 	/usr/bin/openssl genrsa -out $DIR/cert.key 2048
 	if [ $IP_ADDR -eq 1 ]; then
@@ -94,11 +96,12 @@ EOF
 
 gen_ca() {
 	CN=$1
+
 	if [ -d $ROOT ]; then
-		rm $ROOT/*
-	else
-		mkdir $ROOT
+		rm -rf $ROOT/*
 	fi
+
+	mkdir -p $ROOT
 	/usr/bin/openssl genrsa -out $ROOT/ca.key 4096
 	/usr/bin/openssl req -new -subj "/C=$C/CN=$CN" -x509 -days 3650 \
 		-key $ROOT/ca.key -out $ROOT/ca.crt
