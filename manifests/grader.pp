@@ -2,6 +2,7 @@ class omegaup::grader (
 	$root = '/opt/omegaup',
 	$user = 'vagrant',
 	$embedded_runner = 'true',
+	$keystore_password = 'omegaup',
 	$mysql_user = 'omegaup',
 	$mysql_db = 'omegaup',
 	$mysql_host = 'localhost',
@@ -13,6 +14,7 @@ class omegaup::grader (
 	}
 	omegaup::certmanager::cert { "${root}/bin/omegaup.jks":
 		hostname => 'localhost',
+		password => $keystore_password,
 		require  => Vcsrepo[$root],
 	}
 	file { '/var/log/omegaup/service.log':
