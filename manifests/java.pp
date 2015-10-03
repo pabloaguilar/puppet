@@ -1,3 +1,3 @@
 class omegaup::java {
-	package { ['openjdk-8-java', 'ca-certificates']: ensure => installed }
+	package { ['openjdk-8-jre']: ensure => installed }
 }

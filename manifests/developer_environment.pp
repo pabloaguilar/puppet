@@ -2,9 +2,11 @@ class omegaup::developer_environment (
 	$root = '/opt/omegaup',
 	$user = 'vagrant',
 ) {
+	import omegaup::java
+
 	# Packages
 	package { ['vim', 'phpunit', 'openssh-client', 'phpunit-selenium', 'gcc',
-	           'g++', 'silversearcher-ag']:
+	           'g++', 'silversearcher-ag', 'ca-certificates']:
 		ensure  => present,
 	}
 
@@ -28,7 +30,7 @@ class omegaup::developer_environment (
 	exec { 'update-ca-certificates':
 		command => '/usr/sbin/update-ca-certificates -f',
 		creates => '/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/security/cacerts',
-		require => Package['ca-certificates'],
+		require => [Package['ca-certificates'], Package['openjdk-8-jre']],
 	}
 	file { '/usr/bin/sbt':
 		ensure  => 'file',
