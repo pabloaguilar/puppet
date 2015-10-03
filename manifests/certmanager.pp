@@ -3,6 +3,8 @@ class omegaup::certmanager (
 	$ca_name = 'omegaUp Certificate Authority',
 	$country = 'MX',
 ) {
+	include omegaup::java
+
 	file { '/usr/bin/certmanager':
 		ensure => 'file',
 		source => 'puppet:///modules/omegaup/certmanager',

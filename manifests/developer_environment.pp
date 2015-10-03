@@ -3,8 +3,8 @@ class omegaup::developer_environment (
 	$user = 'vagrant',
 ) {
 	# Packages
-	package { ['vim', 'phpunit', 'phpunit-selenium', 'gcc', 'g++',
-						 'silversearcher-ag']:
+	package { ['vim', 'phpunit', 'openssh-client', 'phpunit-selenium', 'gcc',
+	           'g++', 'silversearcher-ag']:
 		ensure  => present,
 	}
 

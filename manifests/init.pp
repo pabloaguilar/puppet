@@ -5,6 +5,10 @@ class omegaup (
 	$mysql_host = 'localhost',
 	$services_ensure = running,
 ) {
+	include omegaup::users
+	include omegaup::scripts
+	include omegaup::directories
+
 	# Definitions
 	define config_php($mysql_db) {
 		file { $title:
@@ -16,30 +20,24 @@ class omegaup (
 	}
 
 	# Packages
-	package { ['git', 'curl', 'unzip', 'openssh-client', 'zip',
-						 'openjdk-8-jdk', 'ca-certificates']:
-		ensure  => present,
+	package { ['git', 'curl', 'unzip', 'zip']:
+		ensure  => installed,
 	}
 
 	package { 'hhvm':
-		ensure  => present,
+		ensure  => installed,
 		require => Apt::Source['hhvm'],
 	}
 
-	# Users
-	user { ['omegaup', 'www-data']:
-		ensure => present,
-	}
-
 	# Common
-	file { '/var/lib/omegaup':
-		ensure => 'directory',
-	}
-	file { '/var/log/omegaup':
-		ensure => 'directory',
-	}
 	file { '/var/www':
 		ensure => 'directory',
+	}
+	exec { "submissions-directory":
+		creates => '/var/lib/omegaup/submissions',
+		command => '/tmp/mkhexdirs.sh /var/lib/omegaup/submissions www-data www-data',
+		require => [File['/var/lib/omegaup'], File['/tmp/mkhexdirs.sh'],
+		            User['www-data']],
 	}
 
 	# Repository
@@ -61,11 +59,6 @@ class omegaup (
 		owner   => $user,
 		group   => $user,
 		require => Vcsrepo[$root],
-	}
-	class { '::omegaup::certmanager': }
-  omegaup::certmanager::cert { "${root}/frontend/omegaup.pem":
-		hostname => 'localhost',
-		require  => Vcsrepo[$root],
 	}
 
 	# Web application
