@@ -2,7 +2,7 @@ class omegaup::developer_environment (
 	$root = '/opt/omegaup',
 	$user = 'vagrant',
 ) {
-	import omegaup::java
+	include omegaup::java
 
 	# Packages
 	package { ['vim', 'phpunit', 'openssh-client', 'phpunit-selenium', 'gcc',
