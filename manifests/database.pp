@@ -7,10 +7,6 @@ class omegaup::database (
 		service_provider => 'systemd',
 	}
 
-	class { '::mysql::bindings':
-		java_enable => true,
-	}
-
 	include '::mysql::server'
 
 	file { '/tmp/omegaup.sql':
