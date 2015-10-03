@@ -1,5 +1,4 @@
 class omegaup::grader (
-	$root = '/opt/omegaup',
 	$user = 'vagrant',
 	$embedded_runner = 'true',
 	$keystore_password = 'omegaup',
@@ -23,13 +22,13 @@ class omegaup::grader (
 		group   => 'omegaup',
 		require => File['/var/log/omegaup'],
 	}
-	file { "${root}/bin/omegaup.conf":
+	file { "/etc/omegaup/grader/omegaup.conf":
 		ensure  => 'file',
 		owner   => $user,
 		group   => $user,
 		mode    => '0644',
 		content => template('omegaup/omegaup.conf.erb'),
-		require => [Vcsrepo[$root]],
+		require => [File['/etc/omegaup/grader'],
 	}
 	exec { "grade-directory":
 		creates => '/var/lib/omegaup/grade',
@@ -54,7 +53,7 @@ class omegaup::grader (
 		provider => 'systemd',
 		require => [File['/etc/systemd/system/omegaup.service'],
 								Exec['grade-directory'],
-								File["${root}/bin/omegaup.conf"],
+								File['/etc/omegaup/grader/omegaup.conf'],
 								Package['libmysql-java'], Package['openjdk-8-jre']],
 	}
 }
