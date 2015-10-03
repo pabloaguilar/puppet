@@ -28,7 +28,7 @@ class omegaup::grader (
 		group   => $user,
 		mode    => '0644',
 		content => template('omegaup/omegaup.conf.erb'),
-		require => [File['/etc/omegaup/grader'],
+		require => File['/etc/omegaup/grader'],
 	}
 	exec { "grade-directory":
 		creates => '/var/lib/omegaup/grade',
