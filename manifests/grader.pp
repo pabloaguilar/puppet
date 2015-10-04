@@ -32,8 +32,8 @@ class omegaup::grader (
 	}
 	exec { "grade-directory":
 		creates => '/var/lib/omegaup/grade',
-		command => '/tmp/mkhexdirs.sh /var/lib/omegaup/grade omegaup omegaup',
-		require => [File['/var/lib/omegaup'], File['/tmp/mkhexdirs.sh'],
+		command => 'mkhexdirs /var/lib/omegaup/grade omegaup omegaup',
+		require => [File['/var/lib/omegaup'], File['/usr/bin/mkhexdirs'],
 		            User['omegaup']],
 	}
 	file { ['/var/lib/omegaup/compile', '/var/lib/omegaup/input']:

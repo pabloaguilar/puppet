@@ -35,8 +35,8 @@ class omegaup (
 	}
 	exec { "submissions-directory":
 		creates => '/var/lib/omegaup/submissions',
-		command => '/tmp/mkhexdirs.sh /var/lib/omegaup/submissions www-data www-data',
-		require => [File['/var/lib/omegaup'], File['/tmp/mkhexdirs.sh'],
+		command => 'mkhexdirs /var/lib/omegaup/submissions www-data www-data',
+		require => [File['/var/lib/omegaup'], File['/usr/bin/mkhexdirs'],
 		            User['www-data']],
 	}
 
