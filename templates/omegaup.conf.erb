@@ -9,7 +9,7 @@
 	},
 	"omegaup": {
 		"salt": "omegaup",
-		"role_url": "https://localhost/api/contest/role/"
+		"role_url": "https://<%= @frontend_host %>/api/contest/role/"
 	},
 	"db": {
 		"driver": "com.mysql.jdbc.Driver",
@@ -37,7 +37,7 @@
 		"port": 21680,
 		"memory_limit": 2048,
 		"scoreboard_refresh": {
-			"url": "https://localhost/api/scoreboard/refresh/",
+			"url": "https://<%= @frontend_host %>/api/scoreboard/refresh/",
 			"token": "secrettoken"
 		},
 		"embedded_runner_enabled": <%= @embedded_runner %>

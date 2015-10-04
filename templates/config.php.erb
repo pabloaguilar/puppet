@@ -5,3 +5,5 @@ define('OMEGAUP_DB_PASS', '<%= @mysql_password %>');
 define('OMEGAUP_DB_NAME', '<%= @mysql_db %>');
 define('OMEGAUP_SSLCERT_URL', '/etc/omegaup/frontend/certificate.pem');
 define('OMEGAUP_CACERT_URL', '/etc/omegaup/frontend/certificate.pem');
+define('OMEGAUP_GRADER_URL', 'https://<%= @grader_host %>/run/grade/');
+define('OMEGAUP_GRADER_BROADCAST_URL', 'https://<%= @grader_host %>/broadcast/');
