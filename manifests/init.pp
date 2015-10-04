@@ -1,7 +1,7 @@
 class omegaup (
 	$root = '/opt/omegaup',
 	$user = 'vagrant',
-	$grader_host = 'localhost:21680',
+	$grader_host = 'https://localhost:21680',
 	$mysql_user = 'omegaup',
 	$mysql_host = 'localhost',
 	$services_ensure = running,

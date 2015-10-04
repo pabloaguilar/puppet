@@ -1,7 +1,7 @@
 class omegaup::grader (
 	$user = 'vagrant',
 	$embedded_runner = 'true',
-	$frontend_host = 'localhost',
+	$frontend_host = 'http://localhost',
 	$keystore_password = 'omegaup',
 	$mysql_user = 'omegaup',
 	$mysql_db = 'omegaup',
