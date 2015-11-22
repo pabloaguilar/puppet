@@ -113,7 +113,20 @@ class omegaup (
 			fastcgi_param     => 'SCRIPT_FILENAME $document_root$fastcgi_script_name',
 			fastcgi_index     => 'index.php',
 			fastcgi_keep_conn => 'on',
-		}
+		},
+	}
+	nginx::resource::location { 'websockets':
+		ensure               => present,
+		vhost                => 'localhost',
+		location             => '^~ /api/contest/events/',
+		proxy                => 'http://localhost:39613',
+		proxy_set_header     => ['Upgrade $http_upgrade', 'Connection "upgrade"', 'Host $host'],
+		location_cfg_prepend => {
+			rewrite            => '^/api/contest/events/(.*) /$1 break',
+		},
+		location_cfg_append  => {
+			proxy_http_version => '1.1',
+		},
 	}
 	service { 'hhvm':
 		ensure  => $services_ensure,
