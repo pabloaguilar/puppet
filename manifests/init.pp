@@ -2,6 +2,7 @@ class omegaup (
 	$root = '/opt/omegaup',
 	$user = 'vagrant',
 	$grader_host = 'https://localhost:21680',
+	$broadcaster_host = 'http://localhost:39613',
 	$mysql_user = 'omegaup',
 	$mysql_host = 'localhost',
 	$services_ensure = running,
@@ -94,7 +95,7 @@ class omegaup (
 	class { 'nginx':
 		service_ensure => $services_ensure,
 	}
-	nginx::resource::vhost { 'localhost':
+	nginx::resource::vhost { 'omegaup':
 		ensure        => present,
 		listen_port   => 80,
 		www_root      => "${root}/frontend/www",
@@ -103,7 +104,7 @@ class omegaup (
 	}
 	nginx::resource::location { 'php':
 		ensure               => present,
-		vhost                => 'localhost',
+		vhost                => 'omegaup',
 		www_root             => "${root}/frontend/www",
 		location             => '~ \.(hh|php)$',
 		fastcgi              => '127.0.0.1:9000',
@@ -117,9 +118,9 @@ class omegaup (
 	}
 	nginx::resource::location { 'websockets':
 		ensure               => present,
-		vhost                => 'localhost',
+		vhost                => 'omegaup',
 		location             => '^~ /api/contest/events/',
-		proxy                => 'http://localhost:39613',
+		proxy                => $broadcaster_host,
 		proxy_set_header     => ['Upgrade $http_upgrade', 'Connection "upgrade"', 'Host $host'],
 		location_cfg_prepend => {
 			rewrite            => '^/api/contest/events/(.*) /$1 break',
