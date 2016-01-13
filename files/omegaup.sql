@@ -123,6 +123,8 @@ CREATE TABLE IF NOT EXISTS `Contests` (
   `scoreboard_url_admin` VARCHAR( 30 ) NULL DEFAULT NULL,
   `urgent` tinyint(1) DEFAULT 0 NOT NULL COMMENT 'Indica si el concurso es de alta prioridad y requiere mejor QoS.',
   `contestant_must_register`   tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Indica que los participantes deben pre-registrarse antes de poder paticipar',
+  `languages` set('c','cpp','java','py','rb','pl','cs','pas','kp','kj','cat','hs','cpp11') DEFAULT NULL COMMENT 'Un filtro (opcional) de qué lenguajes se pueden usar en un concurso',
+  `recommended` BOOL NOT NULL DEFAULT  '0' COMMENT  'Mostrar el concurso en la lista de recomendados.',
   PRIMARY KEY (`contest_id`),
   KEY `director_id` (`director_id`),
   KEY `rerun_id` (`contest_id`),
@@ -138,13 +140,50 @@ CREATE TABLE IF NOT EXISTS `Contests` (
 CREATE TABLE IF NOT EXISTS `Contests_Users` (
   `user_id` int(11) NOT NULL,
   `contest_id` int(11) NOT NULL,
-  `access_time` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'Hora a la que entró el usuario al concurso',  
+  `access_time` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'Hora a la que entró el usuario al concurso',
   `score` int(11) NOT NULL DEFAULT '1' COMMENT 'Indica el puntaje que obtuvo el usuario en el concurso',
   `time` int(11) NOT NULL DEFAULT '1' COMMENT 'Indica el tiempo que acumulo en usuario en el concurso',
   PRIMARY KEY (`user_id`,`contest_id`),
   KEY `user_id` (`user_id`),
   KEY `contest_id` (`contest_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Concursantes que pueden participar en concurso cerrado.';
+
+--
+-- Estructura de tabla para la tabla `User_Login_Log`
+--
+
+CREATE TABLE IF NOT EXISTS `User_Login_Log` (
+	`user_id` int(11) NOT NULL,
+	`ip` int UNSIGNED NOT NULL,
+	`time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	KEY `user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Bitácora de inicios de sesión exitosos';
+
+--
+-- Estructura de tabla para la tabla `Contest_Access_Log`
+--
+
+CREATE TABLE IF NOT EXISTS `Contest_Access_Log` (
+	`contest_id` int(11) NOT NULL,
+	`user_id` int(11) NOT NULL,
+	`ip` int UNSIGNED NOT NULL,
+	`time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	KEY `contest_id` (`contest_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Bitácora de acceso a concursos';
+
+--
+-- Estructura de tabla para la tabla `Submission_Log`
+--
+
+CREATE TABLE IF NOT EXISTS `Submission_Log` (
+	`contest_id` int(11) NULL DEFAULT NULL,
+	`run_id` int(11) NOT NULL,
+	`user_id` int(11) NOT NULL,
+	`ip` int UNSIGNED NOT NULL,
+	`time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY (`run_id`),
+	KEY `contest_id` (`contest_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Bitácora de envíos';
 
 -- --------------------------------------------------------
 
@@ -452,7 +491,6 @@ CREATE TABLE IF NOT EXISTS `Runs` (
   `memory` int(11) NOT NULL DEFAULT '0',
   `score` double NOT NULL DEFAULT '0',
   `contest_score` double NULL DEFAULT NULL,
-  `ip` char(15) NOT NULL,
   `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `submit_delay` int(11) NOT NULL DEFAULT '0',
   `test` tinyint(1) NOT NULL DEFAULT '0',
@@ -463,7 +501,6 @@ CREATE TABLE IF NOT EXISTS `Runs` (
   KEY `contest_id` (`contest_id`),
   UNIQUE KEY `runs_alias` (`guid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Estado de todas las ejecuciones.' AUTO_INCREMENT=1 ;
-
 
 -- --------------------------------------------------------
 
@@ -578,13 +615,12 @@ CREATE TABLE IF NOT EXISTS `Users_Permissions` (
   KEY `permission_id` (`permission_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Establece los permisos que se pueden dar a los usuarios.';
 
-
 --
 -- Estructura de tabla para la tabla `Groups`
 --
 
 CREATE TABLE IF NOT EXISTS `Groups` (
-  `group_id` int(11) AUTO_INCREMENT NOT NULL,  
+  `group_id` int(11) AUTO_INCREMENT NOT NULL,
   `owner_id` int(11) NOT NULL,
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `alias` varchar(50) NOT NULL,
@@ -594,7 +630,6 @@ CREATE TABLE IF NOT EXISTS `Groups` (
   KEY `owner_id` (`owner_id`),
   UNIQUE KEY `groups_alias` (`alias`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
-
 
 --
 -- Estructura de tabla para la tabla `Groups_Users`
@@ -606,7 +641,6 @@ CREATE TABLE IF NOT EXISTS `Groups_Users` (
   KEY `user_id` (`user_id`),
   KEY `group_id` (`group_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
 
 --
 -- Estructura de tabla para la tabla `Groups`
@@ -624,7 +658,6 @@ CREATE TABLE IF NOT EXISTS `Groups_Scoreboards` (
   UNIQUE KEY `groups_scoreboards_alias` (`alias`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
 
-
 --
 -- Estructura de tabla para la tabla `Groups_Users`
 --
@@ -637,6 +670,21 @@ CREATE TABLE IF NOT EXISTS `Groups_Scoreboards_Contests` (
   KEY `group_scoreboard_id` (`group_scoreboard_id`),
   KEY `contest_id` (`contest_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Estructura de tabla para la tabla `Group_Roles`
+--
+
+CREATE TABLE IF NOT EXISTS `Group_Roles` (
+  `group_id` int(11) NOT NULL,
+  `role_id` int(11) NOT NULL,
+  `contest_id` int(11) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`group_id`,`role_id`,`contest_id`),
+  KEY `group_id` (`group_id`),
+  KEY `role_id` (`role_id`),
+  KEY `contest_id` (`contest_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Establece los roles que se pueden dar a los grupos.';
+
 --
 -- Restricciones para tablas volcadas
 --
@@ -681,6 +729,27 @@ ALTER TABLE `Contests_Users`
   ADD CONSTRAINT `fk_cuu_user_id` FOREIGN KEY (`user_id`) REFERENCES `Users` (`user_id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 --
+-- Filtros para la tabla `Contest_Access_Log`
+--
+ALTER TABLE `Contest_Access_Log`
+  ADD CONSTRAINT `fk_calc_contest_id` FOREIGN KEY (`contest_id`) REFERENCES `Contests` (`contest_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  ADD CONSTRAINT `fk_calu_user_id` FOREIGN KEY (`user_id`) REFERENCES `Users` (`user_id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+--
+-- Filtros para la tabla `User_Login_Log`
+--
+ALTER TABLE `User_Login_Log`
+  ADD CONSTRAINT `fk_ullu_user_id` FOREIGN KEY (`user_id`) REFERENCES `Users` (`user_id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+--
+-- Filtros para la tabla `Submission_Log`
+--
+ALTER TABLE `Submission_Log`
+  ADD CONSTRAINT `fk_slc_contest_id` FOREIGN KEY (`contest_id`) REFERENCES `Contests` (`contest_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  ADD CONSTRAINT `fk_slr_run_id` FOREIGN KEY (`run_id`) REFERENCES `Runs` (`run_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  ADD CONSTRAINT `fk_slu_user_id` FOREIGN KEY (`user_id`) REFERENCES `Users` (`user_id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+--
 -- Filtros para la tabla `Problem_Tags`
 --
 ALTER TABLE `Problems_Tags`
@@ -721,6 +790,13 @@ ALTER TABLE `Emails`
 ALTER TABLE `Favorites`
   ADD CONSTRAINT `fk_f_problem_id` FOREIGN KEY (`problem_id`) REFERENCES `Problems` (`problem_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   ADD CONSTRAINT `fk_f_user_id` FOREIGN KEY (`user_id`) REFERENCES `Users` (`user_id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+--
+-- Filtros para la tabla `Group_Roles`
+--
+ALTER TABLE `Group_Roles`
+  ADD CONSTRAINT `fk_gr_role_id` FOREIGN KEY (`role_id`) REFERENCES `Roles` (`role_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  ADD CONSTRAINT `fk_gr_group_id` FOREIGN KEY (`group_id`) REFERENCES `Groups` (`group_id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 --
 -- Filtros para la tabla `Languages`
@@ -808,7 +884,6 @@ ALTER TABLE `User_Roles`
   ADD CONSTRAINT `fk_ur_role_id` FOREIGN KEY (`role_id`) REFERENCES `Roles` (`role_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   ADD CONSTRAINT `fk_ur_user_id` FOREIGN KEY (`user_id`) REFERENCES `Users` (`user_id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
-
 --
 -- Filtros para la tabla `Users_Permissions`
 --
@@ -830,28 +905,27 @@ ALTER TABLE `Groups_Scoreboards_Contests`
   ADD CONSTRAINT `fk_gsc_contest_id` FOREIGN KEY (`contest_id`) REFERENCES `Contests` (`contest_id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   ADD CONSTRAINT `fk_gsc_group_scoreboard_id` FOREIGN KEY (`group_scoreboard_id`) REFERENCES `Groups_Scoreboards` (`group_scoreboard_id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
-
 INSERT INTO  `Roles` (`role_id` ,`name` ,`description`) VALUES (1 ,  'ADMIN',  'Admin');
 INSERT INTO  `Roles` (`role_id` ,`name` ,`description`) VALUES (2 ,  'CONTEST_ADMIN',  'Contest admin');
 INSERT INTO  `Roles` (`role_id` ,`name` ,`description`) VALUES (3 ,  'PROBLEM_ADMIN',  'Problem admin');
 
-
 --
 -- Update AC Count on grade
 --
-DELIMITER $$ 
-CREATE TRIGGER `ACUpdate` AFTER UPDATE ON  `Runs` 
+DELIMITER $$
+CREATE TRIGGER `ACUpdate` AFTER UPDATE ON  `Runs`
 FOR EACH ROW BEGIN
 	IF (OLD.verdict = 'AC' OR NEW.verdict = 'AC') THEN
 		UPDATE  `Problems` SET  `Problems`.`accepted` = (
-			SELECT COUNT( DISTINCT user_id ) 
-				FROM  `Runs` 
+			SELECT COUNT( DISTINCT user_id )
+				FROM  `Runs`
 				WHERE  `Runs`.`verdict` =  'AC'
 				AND NEW.`problem_id` =  `Runs`.`problem_id`
-			)	
-		WHERE NEW.problem_id =  `Problems`.`problem_id`;	
+			)
+		WHERE NEW.problem_id =  `Problems`.`problem_id`;
 	END IF;
-END$$	
+END$$
 DELIMITER ;
 
 COMMIT;
+
