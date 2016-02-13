@@ -6,7 +6,7 @@ class omegaup::developer_environment (
 
 	# Packages
 	package { ['vim', 'phpunit', 'openssh-client', 'phpunit-selenium', 'gcc',
-	           'g++', 'silversearcher-ag', 'ca-certificates']:
+	           'g++', 'silversearcher-ag', 'ca-certificates', 'phpcs']:
 		ensure  => present,
 	}
 
