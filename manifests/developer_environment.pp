@@ -4,11 +4,15 @@ class omegaup::developer_environment (
 	$mysql_user = 'omegaup',
 ) {
 	include omegaup::java
+	include pear
 
 	# Packages
 	package { ['vim', 'phpunit', 'openssh-client', 'phpunit-selenium', 'gcc',
-	           'g++', 'silversearcher-ag', 'ca-certificates', 'php-codesniffer']:
+	           'g++', 'silversearcher-ag', 'ca-certificates']:
 		ensure  => present,
+	}
+	pear::package { "PHP_CodeSniffer":
+		version => "2.6.2",
 	}
 
 	# Definitions
