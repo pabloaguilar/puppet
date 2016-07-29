@@ -22,6 +22,8 @@ class omegaup (
 	}
 
 	# Packages
+	Apt::Source <| |> ~> Class['apt::update'] -> Package <| |>
+
 	package { ['git', 'curl', 'unzip', 'zip']:
 		ensure  => installed,
 	}

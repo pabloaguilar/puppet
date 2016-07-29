@@ -9,9 +9,6 @@ class omegaup::database (
 
 	include '::mysql::server'
 
-	Class['apt::update'] ~> Class['::mysql::server::install']
-	Class['apt::update'] ~> Class['::mysql::client::install']
-
 	file { '/tmp/omegaup.sql':
 		ensure => 'file',
 		source => 'puppet:///modules/omegaup/omegaup.sql',
