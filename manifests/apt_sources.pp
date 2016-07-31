@@ -1,14 +1,33 @@
-class omegaup::apt_sources {
+class omegaup::apt_sources (
+	$distribution = 'wily',
+) {
+	# Stages
+	stage { 'init':
+		before => Stage['main'],
+	}
+
 	# Packages
 	class { 'apt':
 		update => {
 			frequency => 'daily',
 		},
+		stage => init,
 	}
 
 	include apt
 
-	apt::pin { 'vivid': priority => 700 }
+	Apt::Source <| |> ~> Class['apt::update']
+
+	class { '::omegaup::apt_sources::internal':
+		stage => init,
+		distribution => $distribution,
+	}
+}
+
+class omegaup::apt_sources::internal (
+	$distribution = 'wily',
+) {
+	apt::pin { $distribution: priority => 700 }
 
 	# HHVM
 	apt::source { 'hhvm':

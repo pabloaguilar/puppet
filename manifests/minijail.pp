@@ -5,7 +5,6 @@ class omegaup::minijail {
 
 	package { 'omegaup-minijail':
 		ensure  => present,
-		require => Apt::Ppa['ppa:omegaup/omegaup'],
 	}
 
 	file { '/etc/sudoers.d/minijail':

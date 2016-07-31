@@ -3,6 +3,7 @@ class omegaup (
 	$user = 'vagrant',
 	$grader_host = 'https://localhost:21680',
 	$broadcaster_host = 'http://localhost:39613',
+	$repo_url = 'https://github.com/omegaup/omegaup.git',
 	$mysql_user = 'omegaup',
 	$mysql_host = 'localhost',
 	$services_ensure = running,
@@ -22,15 +23,12 @@ class omegaup (
 	}
 
 	# Packages
-	Apt::Source <| |> ~> Class['apt::update'] -> Package <| |>
-
 	package { ['git', 'curl', 'unzip', 'zip']:
 		ensure  => installed,
 	}
 
 	package { 'hhvm':
 		ensure  => installed,
-		require => Apt::Source['hhvm'],
 	}
 
 	# Common
@@ -52,7 +50,7 @@ class omegaup (
 	vcsrepo { $root:
 		ensure   => present,
 		provider => git,
-		source   => 'https://github.com/omegaup/omegaup.git',
+		source   => $repo_url,
 		user     => $user,
 		group    => $user,
 		require  => File[$root],
