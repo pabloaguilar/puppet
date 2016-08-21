@@ -50,7 +50,7 @@ class omegaup (
 		owner  => $user,
 	}
 	vcsrepo { $root:
-		ensure   => present,
+		ensure   => latest,
 		provider => git,
 		source   => $repo_url,
 		user     => $user,
@@ -138,6 +138,15 @@ class omegaup (
 		require => Package['hhvm'],
 	}
 
+	# Database
+	dbmigrate { $root:
+		ensure                  => latest,
+		development_environment => $development_environment,
+		subscribe               => [Vcsrepo[$root], Mysql::Db['omegaup'],
+		                            Mysql::Db['omegaup-test']],
+	}
+
+	# Development environment
 	if $development_environment {
 		class { '::omegaup::developer_environment':
 			root           => $root,
