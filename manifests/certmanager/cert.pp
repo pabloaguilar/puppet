@@ -12,7 +12,7 @@ define omegaup::certmanager::cert (
 	exec { "certmanager-${title}":
 		command => "/usr/bin/certmanager cert --root '${omegaup::certmanager::ssl_root}' --country '${country}' --hostname '${hostname}' --output '${title}' --password '${password}'",
 		creates => $title,
-		require => [Exec['certmanager-ca'], Package['openjdk-8-jre']],
+		require => [Exec['certmanager-ca'], Package[$::omegaup::java::jre_package]],
 	}
 
 	file { $title:

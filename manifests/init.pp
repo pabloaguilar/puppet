@@ -1,11 +1,13 @@
 class omegaup (
+	$development_environment = false,
 	$root = '/opt/omegaup',
 	$user = 'vagrant',
 	$grader_host = 'https://localhost:21680',
 	$broadcaster_host = 'http://localhost:39613',
 	$repo_url = 'https://github.com/omegaup/omegaup.git',
-	$mysql_user = 'omegaup',
 	$mysql_host = 'localhost',
+	$mysql_user = 'omegaup',
+	$mysql_password = undef,
 	$services_ensure = running,
 ) {
 	include omegaup::users
@@ -94,6 +96,7 @@ class omegaup (
 	}
 	class { 'nginx':
 		service_ensure => $services_ensure,
+		manage_repo    => false,
 	}
 	nginx::resource::vhost { 'omegaup':
 		ensure        => present,
@@ -133,5 +136,16 @@ class omegaup (
 		ensure  => $services_ensure,
 		enable  => true,
 		require => Package['hhvm'],
+	}
+
+	if $development_environment {
+		class { '::omegaup::developer_environment':
+			root           => $root,
+			user           => $user,
+			mysql_host     => $mysql_host,
+			mysql_user     => $mysql_user,
+			mysql_password => $mysql_password,
+			require        => [Vcsrepo[$root], Package['hhvm']],
+		}
 	}
 }

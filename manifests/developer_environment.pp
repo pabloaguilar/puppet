@@ -1,15 +1,16 @@
 class omegaup::developer_environment (
-	$root = '/opt/omegaup',
-	$user = 'vagrant',
-	$mysql_user = 'omegaup',
+	$root,
+	$user,
+	$mysql_host,
+	$mysql_user,
+	$mysql_password,
 ) {
 	include omegaup::java
 	include pear
 
 	# Packages
-	package { ['vim', 'phpunit', 'openssh-client', 'phpunit-selenium', 'gcc',
-	           'g++', 'silversearcher-ag', 'ca-certificates', 'netbeans',
-	           'vim-gtk']:
+	package { ['vim', 'phpunit', 'openssh-client', 'gcc', 'g++',
+	           'silversearcher-ag', 'ca-certificates', 'meld', 'vim-gtk']:
 		ensure  => present,
 	}
 	pear::package { "PHP_CodeSniffer":
@@ -35,8 +36,8 @@ class omegaup::developer_environment (
 	# SBT
 	exec { 'update-ca-certificates':
 		command => '/usr/sbin/update-ca-certificates -f',
-		creates => '/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/security/cacerts',
-		require => [Package['ca-certificates'], Package['openjdk-8-jre']],
+		creates => "${::omegaup::java::jre_directory}/lib/security/cacerts",
+		require => [Package['ca-certificates'], Package[$::omegaup::java::jre_package]],
 	}
 	file { '/usr/bin/sbt':
 		ensure  => 'file',
@@ -54,23 +55,19 @@ class omegaup::developer_environment (
 	file_line { 'hhvm include_path':
 		line    => 'include_path = /usr/share/php:.',
 		path    => '/etc/hhvm/php.ini',
-		require => Package['hhvm'],
 	}
 	config_php { "${root}/frontend/tests/test_config.php":
 		mysql_db => 'omegaup-test',
-		require => Vcsrepo[$root],
 	}
 	file { "${root}/frontend/tests/controllers/omegaup.log":
 		ensure  => 'file',
 		owner   => $user,
 		group   => $user,
-		require => Vcsrepo[$root],
 	}
 	file { ["${root}/frontend/tests/controllers/problems",
 			"${root}/frontend/tests/controllers/submissions"]:
 		ensure  => 'directory',
 		owner   => $user,
 		group   => $user,
-		require => Vcsrepo[$root],
 	}
 }

@@ -55,6 +55,6 @@ class omegaup::grader (
 		require => [File['/etc/systemd/system/omegaup.service'],
 								Exec['grade-directory'],
 								File['/etc/omegaup/grader/omegaup.conf'],
-								Package['libmysql-java'], Package['openjdk-8-jre']],
+								Package['libmysql-java'], Package[$::omegaup::java::jre_package]],
 	}
 }

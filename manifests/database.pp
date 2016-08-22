@@ -1,10 +1,11 @@
 class omegaup::database (
 	$root_password,
 	$password,
+	$service_provider = 'systemd',
 ) {
 	class { '::mysql::server':
-		root_password => $root_password,
-		service_provider => 'systemd',
+		root_password    => $root_password,
+		service_provider => $service_provider,
 	}
 
 	include '::mysql::server'
@@ -39,7 +40,7 @@ class omegaup::database (
 
 	mysql::db { 'omegaup-test':
 		user     => 'omegaup',
-		password => $mysql_password,
+		password => $password,
 		host     => 'localhost',
 		grant    => ['SELECT', 'INSERT', 'UPDATE', 'DELETE', 'DROP'],
 		sql      => ['/tmp/omegaup.sql',
