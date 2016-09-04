@@ -6,26 +6,32 @@ Puppet::Type.type(:dbmigrate).provide(:mysql, :parent => Puppet::Provider::DbMig
   commands :python3 => "/usr/bin/python3"
 
   def exists?
-    output = execute([command(:python3),
-                      "#{resource[:name]}/stuff/db-migrate.py", defaults_file,
-                      'exists'], { :failonfail => false })
+    output = execute([command(:python3)] + default_args + ['exists'],
+                     { :failonfail => false })
     return output.exitstatus == 0
   end
 
   def latest?
-    output = execute([command(:python3),
-                      "#{resource[:name]}/stuff/db-migrate.py", defaults_file,
-                      'latest'], { :failonfail => false })
+    output = execute([command(:python3)] + default_args + ['latest'],
+                     { :failonfail => false })
     return output.exitstatus == 0
   end
 
   def migrate
-    args = ["#{resource[:name]}/stuff/db-migrate.py", defaults_file,
-            'migrate']
+    args = default_args + ['migrate']
     if resource[:development_environment]
       args += ['--development-environment']
     end
     python3(args)
+  end
+
+  def default_args
+    scriptname = "#{resource[:name]}/stuff/db-migrate.py"
+    if File.file?("#{Facter.value(:root_home)}/.my.cnf")
+      [scriptname, "--config-file=#{Facter.value(:root_home)}/.my.cnf"]
+    else
+      [scriptname]
+    end
   end
 end
 
