@@ -9,8 +9,9 @@ class omegaup::developer_environment (
 	include pear
 
 	# Packages
-	package { ['vim', 'phpunit', 'openssh-client', 'gcc', 'g++',
-	           'silversearcher-ag', 'ca-certificates', 'meld', 'vim-gtk']:
+	package { ['vim', 'phpunit', 'openssh-client', 'gcc', 'g++', 'python3',
+						 'clang-format-3.7', 'python-pip', 'silversearcher-ag',
+						 'ca-certificates', 'meld', 'vim-gtk']:
 		ensure  => present,
 	}
 	pear::package { "PHP_CodeSniffer":
@@ -56,8 +57,27 @@ class omegaup::developer_environment (
 		line    => 'include_path = /usr/share/php:.',
 		path    => '/etc/hhvm/php.ini',
 	}
-	config_php { "${root}/frontend/tests/test_config.php":
-		mysql_db => 'omegaup-test',
+	config_php { 'test settings':
+		settings => {
+			'OMEGAUP_DB_USER'     => $mysql_user,
+			'OMEGAUP_DB_HOST'     => $mysql_host,
+			'OMEGAUP_DB_PASS'     => $mysql_password,
+			'OMEGAUP_DB_NAME'     => 'omegaup-test',
+			'OMEGAUP_SSLCERT_URL' => '/etc/omegaup/frontend/certificate.pem',
+			'OMEGAUP_CACERT_URL'  => '/etc/omegaup/frontend/certificate.pem',
+		},
+		ensure   => present,
+	  path     => "${root}/frontend/tests/test_config.php",
+		owner    =>  $user,
+		group    =>  $user,
+	}
+	config_php { 'developer settings':
+		settings => {
+			'OMEGAUP_DEVELOPMENT_ENVIRONMENT' => 'true',
+		},
+		ensure   => present,
+	  path     => "${root}/frontend/server/config.php",
+		require  => Config_php['default settings'],
 	}
 	file { "${root}/frontend/tests/controllers/omegaup.log":
 		ensure  => 'file',

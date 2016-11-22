@@ -4,7 +4,7 @@ class omegaup (
 	$user = 'vagrant',
 	$grader_host = 'https://localhost:21680',
 	$broadcaster_host = 'http://localhost:39613',
-	$repo_url = 'https://github.com/omegaup/omegaup.git',
+	$github_repo = 'omegaup/omegaup',
 	$mysql_host = 'localhost',
 	$mysql_user = 'omegaup',
 	$mysql_password = undef,
@@ -13,16 +13,6 @@ class omegaup (
 	include omegaup::users
 	include omegaup::scripts
 	include omegaup::directories
-
-	# Definitions
-	define config_php($mysql_db) {
-		file { $title:
-			ensure  => 'file',
-			content => template('omegaup/config.php.erb'),
-			owner   => $user,
-			group   => $user,
-		}
-	}
 
 	# Packages
 	package { ['git', 'curl', 'unzip', 'zip']:
@@ -48,21 +38,21 @@ class omegaup (
 	file { $root:
 		ensure => 'directory',
 		owner  => $user,
+		group  => $user,
 	}
-	vcsrepo { $root:
-		ensure   => latest,
-		provider => git,
-		source   => $repo_url,
-		user     => $user,
+	github { $root:
+		ensure   => present,
+		repo     => $github_repo,
+		owner    => $user,
 		group    => $user,
-		require  => File[$root],
+		require  => [File[$root], Package['git']],
 	}
 	file { "${root}/.git/hooks/pre-push":
 		ensure  => 'link',
 		target  => "${root}/stuff/git-hooks/pre-push",
 		owner   => $user,
 		group   => $user,
-		require => Vcsrepo[$root],
+		require => Github[$root],
 	}
 
 	# Web application
@@ -81,18 +71,33 @@ class omegaup (
 	file { '/var/www/omegaup.com':
 		ensure  => 'link',
 		target  => "${root}/frontend/www",
-		require => [File['/var/www'], Vcsrepo[$root]],
+		require => [File['/var/www'], Github[$root]],
 	}
 	file { ["${root}/frontend/www/img",
 					"${root}/frontend/www/templates"]:
 		ensure  => 'directory',
 		owner   => 'www-data',
 		group   => 'www-data',
-		require => Vcsrepo[$root],
+		require => Github[$root],
 	}
-	config_php { "${root}/frontend/server/config.php":
-		mysql_db => 'omegaup',
-		require => Vcsrepo[$root],
+	config_php { 'default settings':
+		settings => {
+			'OMEGAUP_DB_USER'                  => $mysql_user,
+			'OMEGAUP_DB_HOST'                  => $mysql_host,
+			'OMEGAUP_DB_PASS'                  => $mysql_password,
+			'OMEGAUP_DB_NAME'                  => 'omegaup',
+			'OMEGAUP_SSLCERT_URL'              => '/etc/omegaup/frontend/certificate.pem',
+			'OMEGAUP_CACERT_URL'               => '/etc/omegaup/frontend/certificate.pem',
+			'OMEGAUP_GRADER_URL'               => "${grader_host}/run/grade/",
+			'OMEGAUP_GRADER_BROADCAST_URL'     => "${grader_host}/broadcast/",
+			'OMEGAUP_GRADER_RELOAD_CONFIG_URL' => "${grader_host}/reload-config/",
+			'OMEGAUP_GRADER_STATUS_URL'        => "${grader_host}/grader/status/",
+		},
+		ensure   => present,
+	  path     => "${root}/frontend/server/config.php",
+		owner    => $user,
+		group    => $user,
+		require  => Github[$root],
 	}
 	class { 'nginx':
 		service_ensure => $services_ensure,
@@ -101,22 +106,27 @@ class omegaup (
 	nginx::resource::vhost { 'omegaup':
 		ensure        => present,
 		listen_port   => 80,
-		www_root      => "${root}/frontend/www",
 		index_files   => ['index.php', 'index.html'],
 		include_files => ["${root}/frontend/server/nginx.rewrites"],
+		error_pages   => {
+			404 => '/404.html',
+		},
+		vhost_cfg_prepend => {
+			root => "${root}/frontend/www",
+		},
 	}
 	nginx::resource::location { 'php':
 		ensure               => present,
 		vhost                => 'omegaup',
-		www_root             => "${root}/frontend/www",
 		location             => '~ \.(hh|php)$',
 		fastcgi              => '127.0.0.1:9000',
 		proxy                => undef,
 		fastcgi_script       => undef,
 		location_cfg_prepend => {
-			fastcgi_param     => 'SCRIPT_FILENAME $document_root$fastcgi_script_name',
-			fastcgi_index     => 'index.php',
-			fastcgi_keep_conn => 'on',
+			fastcgi_param            => 'SCRIPT_FILENAME $document_root$fastcgi_script_name',
+			fastcgi_index            => 'index.php',
+			fastcgi_keep_conn        => 'on',
+			fastcgi_intercept_errors => 'on',
 		},
 	}
 	nginx::resource::location { 'websockets':
@@ -142,7 +152,7 @@ class omegaup (
 	dbmigrate { $root:
 		ensure                  => latest,
 		development_environment => $development_environment,
-		subscribe               => [Vcsrepo[$root], Mysql::Db['omegaup'],
+		subscribe               => [Github[$root], Mysql::Db['omegaup'],
 		                            Mysql::Db['omegaup-test']],
 	}
 
@@ -154,7 +164,7 @@ class omegaup (
 			mysql_host     => $mysql_host,
 			mysql_user     => $mysql_user,
 			mysql_password => $mysql_password,
-			require        => [Vcsrepo[$root], Package['hhvm']],
+			require        => [Github[$root], Package['hhvm']],
 		}
 	}
 }
