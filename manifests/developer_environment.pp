@@ -67,7 +67,7 @@ class omegaup::developer_environment (
 			'OMEGAUP_CACERT_URL'  => '/etc/omegaup/frontend/certificate.pem',
 		},
 		ensure   => present,
-	  path     => "${root}/frontend/tests/test_config.php",
+		path     => "${root}/frontend/tests/test_config.php",
 		owner    =>  $user,
 		group    =>  $user,
 	}
@@ -76,7 +76,15 @@ class omegaup::developer_environment (
 			'OMEGAUP_DEVELOPMENT_ENVIRONMENT' => 'true',
 		},
 		ensure   => present,
-	  path     => "${root}/frontend/server/config.php",
+		path     => "${root}/frontend/server/config.php",
+		require  => Config_php['default settings'],
+	}
+	config_php { 'experiments schools':
+		settings => {
+			'EXPERIMENT_SCHOOLS' => 'true',
+		},
+		ensure   => present,
+		path     => "${root}/frontend/server/config.php",
 		require  => Config_php['default settings'],
 	}
 	file { "${root}/frontend/tests/controllers/omegaup.log":
