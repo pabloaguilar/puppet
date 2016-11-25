@@ -14,8 +14,12 @@ class omegaup::developer_environment (
 						 'ca-certificates', 'meld', 'vim-gtk']:
 		ensure  => present,
 	}
-	pear::package { "PHP_CodeSniffer":
-		version => "2.6.2",
+	pear::package { 'PHP_CodeSniffer':
+		version => '2.6.2',
+	}
+	package { 'https://github.com/google/closure-linter/zipball/master':
+		ensure   => present,
+		provider => 'pip',
 	}
 
 	# Definitions
