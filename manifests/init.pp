@@ -103,17 +103,22 @@ class omegaup (
 		service_ensure => $services_ensure,
 		manage_repo    => false,
 	}
+	file { '/etc/nginx/conf.d/default.conf':
+		ensure  => absent,
+		require => Package['nginx'],
+	}
 	nginx::resource::vhost { 'omegaup':
-		ensure        => present,
-		listen_port   => 80,
-		index_files   => ['index.php', 'index.html'],
-		include_files => ["${root}/frontend/server/nginx.rewrites"],
-		error_pages   => {
+		ensure            => present,
+		listen_port       => 80,
+		index_files       => ['index.php', 'index.html'],
+		include_files     => ["${root}/frontend/server/nginx.rewrites"],
+		error_pages       => {
 			404 => '/404.html',
 		},
 		vhost_cfg_prepend => {
 			root => "${root}/frontend/www",
 		},
+		require           => File['/etc/nginx/conf.d/default.conf'],
 	}
 	nginx::resource::location { 'php':
 		ensure               => present,
