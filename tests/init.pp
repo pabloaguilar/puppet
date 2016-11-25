@@ -10,3 +10,5 @@
 # http://docs.puppetlabs.com/guides/tests_smoke.html
 #
 include omegaup
+
+# vim:expandtab ts=2 sw=2

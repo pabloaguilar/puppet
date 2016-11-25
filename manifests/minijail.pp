@@ -16,3 +16,5 @@ class omegaup::minijail {
     require => [User['omegaup'], Package['sudo']],
   }
 }
+
+# vim:expandtab ts=2 sw=2

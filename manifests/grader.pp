@@ -60,3 +60,5 @@ class omegaup::grader (
                 Package['libmysql-java'], Package[$::omegaup::java::jre_package]],
   }
 }
+
+# vim:expandtab ts=2 sw=2

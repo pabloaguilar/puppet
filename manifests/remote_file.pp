@@ -18,3 +18,5 @@ define omegaup::remote_file(
     require => Exec["wget_${title}"],
   }
 }
+
+# vim:expandtab ts=2 sw=2

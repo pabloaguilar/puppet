@@ -87,3 +87,5 @@ class omegaup::developer_environment (
     group  => $user,
   }
 }
+
+# vim:expandtab ts=2 sw=2

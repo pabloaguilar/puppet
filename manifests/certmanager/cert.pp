@@ -23,3 +23,5 @@ define omegaup::certmanager::cert (
     require => [Exec["certmanager-${title}"]],
   }
 }
+
+# vim:expandtab ts=2 sw=2

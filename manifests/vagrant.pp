@@ -36,3 +36,5 @@ class { '::omegaup':
   require                 => [Class['::omegaup::database'],
                               Class['::omegaup::apt_sources']],
 }
+
+# vim:expandtab ts=2 sw=2

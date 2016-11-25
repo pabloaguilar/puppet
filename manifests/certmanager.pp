@@ -25,3 +25,5 @@ class omegaup::certmanager (
                 File[$::omegaup::certmanager::ssl_root]],
   }
 }
+
+# vim:expandtab ts=2 sw=2

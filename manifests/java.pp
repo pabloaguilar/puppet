@@ -9,3 +9,5 @@ class omegaup::java {
 
   package { $jre_package: ensure => installed }
 }
+
+# vim:expandtab ts=2 sw=2

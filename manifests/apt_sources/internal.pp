@@ -24,3 +24,5 @@ class omegaup::apt_sources::internal {
     apt::ppa { 'ppa:omegaup/omegaup': }
   }
 }
+
+# vim:expandtab ts=2 sw=2

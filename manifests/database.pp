@@ -24,3 +24,5 @@ class omegaup::database (
     grant    => ['SELECT', 'INSERT', 'UPDATE', 'DELETE', 'DROP'],
   }
 }
+
+# vim:expandtab ts=2 sw=2

@@ -20,3 +20,5 @@ class omegaup::apt_sources {
     stage => init,
   }
 }
+
+# vim:expandtab ts=2 sw=2

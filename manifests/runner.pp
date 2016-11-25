@@ -74,3 +74,5 @@ service { 'runner':
               Archive['minijail'],
               File['/etc/sudoers.d/minijail']]
 }
+
+# vim:expandtab ts=2 sw=2
