@@ -47,6 +47,8 @@ class omegaup::grader (
 		ensure  => 'file',
 		source  => "puppet:///modules/omegaup/omegaup.service",
 		mode    => '0644',
+		owner   => 'root',
+		group   => 'root',
 	}
 	service { 'omegaup':
 		ensure  => $services_ensure,
