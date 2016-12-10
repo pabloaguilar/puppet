@@ -134,19 +134,6 @@ class omegaup (
       fastcgi_intercept_errors => 'on',
     },
   }
-  nginx::resource::location { 'websockets':
-    ensure               => present,
-    vhost                => 'omegaup',
-    location             => '^~ /api/contest/events/',
-    proxy                => $broadcaster_host,
-    proxy_set_header     => ['Upgrade $http_upgrade', 'Connection "upgrade"', 'Host $host'],
-    location_cfg_prepend => {
-      rewrite            => '^/api/contest/events/(.*) /$1 break',
-    },
-    location_cfg_append  => {
-      proxy_http_version => '1.1',
-    },
-  }
   service { 'hhvm':
     ensure  => $services_ensure,
     enable  => true,
