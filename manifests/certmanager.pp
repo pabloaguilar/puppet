@@ -1,7 +1,7 @@
 # Generates certificates needed for frontend-backend communication.
 class omegaup::certmanager (
   $ssl_root = '/etc/certmanager',
-  $ca_name = 'omegaUp Certificate Authority',
+  $ca_name = 'omegaUp Testing Certificate Authority',
   $country = 'MX',
 ) {
   include omegaup::java
