@@ -68,6 +68,12 @@ class omegaup (
     group   => 'www-data',
     require => File['/var/log/omegaup'],
   }
+  file { '/var/log/omegaup/csp.log':
+    ensure  => 'file',
+    owner   => 'www-data',
+    group   => 'www-data',
+    require => File['/var/log/omegaup'],
+  }
   file { '/var/www/omegaup.com':
     ensure  => 'link',
     target  => "${root}/frontend/www",
@@ -158,6 +164,19 @@ class omegaup (
       mysql_password => $mysql_password,
       require        => [Github[$root], Package['hhvm']],
     }
+  }
+
+  # Log management
+  package { 'logrotate':
+    ensure => installed,
+  }
+  file { '/etc/logrotate.d/omegaup':
+    ensure  => 'file',
+    source  => 'puppet:///modules/omegaup/omegaup.logrotate',
+    mode    => 0644,
+    owner   => 'root',
+    group   => 'root',
+    require => Package['logrotate'],
   }
 }
 
