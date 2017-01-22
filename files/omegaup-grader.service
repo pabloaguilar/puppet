@@ -1,0 +1,14 @@
+[Unit]
+Description=omegaUp grading service
+After=network.target
+
+[Service]
+Type=simple
+User=omegaup
+Group=omegaup
+ExecStart=/usr/bin/omegaup-grader
+WorkingDirectory=/var/lib/omegaup
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

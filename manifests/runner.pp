@@ -10,7 +10,7 @@ stage { 'pre':
 }
 class pre { # lint:ignore:autoloader_layout
   exec { 'stop_runner':
-    command => '/usr/sbin/service runner stop',
+    command => '/bin/systemctl stop omegaup-runner',
     returns => [0, 1],
   }
 }
@@ -18,61 +18,8 @@ class { 'pre':
   stage => 'pre',
 }
 
-# Packages
-include apt
-include archive::prerequisites
-Exec['apt_update'] -> Package <| |>
-apt::pin { 'utopic': priority => 700 }
-apt::pin { 'utopic-updates': priority => 700 }
-apt::pin { 'utopic-security': priority => 700 }
-package { ['git', 'openjdk-8-jre', 'ca-certificates']:
-  ensure  => present,
-}
-
-# Users
-user { ['omegaup']:
-  ensure => present,
-}
-
-# Execution environment
-file { [$omegaup_root, "${omegaup_root}/bin", "${omegaup_root}/compile",
-        "${omegaup_root}/input"]:
-  ensure => 'directory',
-  owner  => 'omegaup',
-}
-archive { 'minijail':
-  ensure           => present,
-  url              => 'https://deploy.omegaup.com/distrib/minijail.tar.bz2',
-  target           => $omegaup_root,
-  extension        => 'tar.bz2',
-  digest_type      => 'sha1',
-  checksum         => true,
-  strip_components => 1,
-}
-file { '/etc/sudoers.d/minijail':
-  ensure  => 'file',
-  content => "omegaup ALL = NOPASSWD: ${omegaup_root}/minijail/bin/minijail0
-",
-  mode    => '0440',
-}
-omegaup::remote_file { "${omegaup_root}/bin/runner.jar":
-  source  => 'https://deploy.omegaup.com/distrib/runner.jar',
-  require => File["${omegaup_root}/bin"],
-}
-
-# Runner service
-file { '/etc/init.d/runner':
-  ensure => 'file',
-  source => 'puppet:///modules/omegaup/runner.service',
-  mode   => '0755',
-}
-service { 'runner':
-  ensure  => running,
-  enable  => true,
-  require => [File['/etc/init.d/runner'],
-              File["${omegaup_root}/bin/runner.jar"],
-              Archive['minijail'],
-              File['/etc/sudoers.d/minijail']]
-}
+class { '::omegaup::apt_sources': }
+class { '::omegaup::minijail': }
+class { '::omegaup::runner': }
 
 # vim:expandtab ts=2 sw=2

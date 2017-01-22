@@ -1,0 +1,18 @@
+{
+	"Broadcaster": {
+		"FrontendURL": "<%= @frontend_host %>"
+	},
+	"DB": {
+		"Driver": "mysql",
+		"DataSourceName": "<%= @mysql_user %>:<%= @mysql_password %>@/<%= @mysql_db %>"
+	},
+	"Metrics": {
+		"Port": 6061
+	},
+	"Grader": {
+		"BroadcasterURL": "<%= @broadcaster_host %>/broadcast/",
+		"V1": {
+			"Enabled": true
+		}
+	}
+}

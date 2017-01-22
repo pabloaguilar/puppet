@@ -7,13 +7,20 @@ define omegaup::certmanager::cert (
   $owner = undef,
   $group = undef,
   $mode = undef,
+  $separate_cert = undef,
 ) {
-  include omegaup::java
+  if $separate_cert != undef {
+    $command = "/usr/bin/certmanager cert --root '${omegaup::certmanager::ssl_root}' --country '${country}' --hostname '${hostname}' --output '${title}' --cert-output '${separate_cert}' --password '${password}'"
+    $creates = [$title, $separate_cert]
+  } else {
+    $command = "/usr/bin/certmanager cert --root '${omegaup::certmanager::ssl_root}' --country '${country}' --hostname '${hostname}' --output '${title}' --password '${password}'"
+    $creates = [$title]
+  }
 
   exec { "certmanager-${title}":
-    command => "/usr/bin/certmanager cert --root '${omegaup::certmanager::ssl_root}' --country '${country}' --hostname '${hostname}' --output '${title}' --password '${password}'",
-    creates => $title,
-    require => [Exec['certmanager-ca'], Package[$::omegaup::java::jre_package]],
+    command => $command,
+    creates => $creates,
+    require => [Exec['certmanager-ca']],
   }
 
   file { $title:
@@ -21,6 +28,14 @@ define omegaup::certmanager::cert (
     group   => $group,
     mode    => $mode,
     require => [Exec["certmanager-${title}"]],
+  }
+
+  if $separate_cert != undef {
+    file { $separate_cert:
+      owner   => $owner,
+      group   => $group,
+      require => [Exec["certmanager-${title}"]],
+    }
   }
 }
 

@@ -1,0 +1,75 @@
+class omegaup::services::grader (
+  $user = 'vagrant',
+  $hostname = 'localhost',
+  $embedded_runner = true,
+  $broadcaster_host = 'https://localhost:32672',
+  $frontend_host = 'http://localhost',
+  $keystore_password = 'omegaup',
+  $mysql_user = 'omegaup',
+  $mysql_db = 'omegaup',
+  $mysql_host = 'localhost',
+  $services_ensure = running,
+) {
+  include omegaup::users
+  include omegaup::scripts
+  include omegaup::directories
+
+  # Configuration
+  file { '/etc/omegaup/grader':
+    ensure => 'directory',
+    require => File['/etc/omegaup'],
+  }
+  file { '/etc/omegaup/grader/config.json':
+    ensure  => 'file',
+    owner   => 'omegaup',
+    group   => 'omegaup',
+    mode    => '0600',
+    content => template('omegaup/grader/config.json.erb'),
+    require => File['/etc/omegaup/grader'],
+  }
+  omegaup::certmanager::cert { '/etc/omegaup/grader/key.pem':
+    hostname      => $hostname,
+    password      => $keystore_password,
+    owner         => 'omegaup',
+    mode          => '0600',
+    separate_cert => '/etc/omegaup/grader/certificate.pem',
+    require       => [File['/etc/omegaup/grader'], User['omegaup']],
+  }
+
+  # Runtime files
+  file { ['/var/log/omegaup/service.log', '/var/log/omegaup/tracing.json']:
+    ensure  => 'file',
+    owner   => 'omegaup',
+    group   => 'omegaup',
+    require => File['/var/log/omegaup'],
+  }
+  file { ['/var/lib/omegaup/input', '/var/lib/omegaup/cache',
+          '/var/lib/omegaup/grade']:
+    ensure  => 'directory',
+    owner   => 'omegaup',
+    group   => 'omegaup',
+    require => File['/var/lib/omegaup'],
+  }
+
+  # Service
+  file { '/etc/systemd/system/omegaup-grader.service':
+    ensure => 'file',
+    source => 'puppet:///modules/omegaup/omegaup-grader.service',
+    mode   => '0644',
+    owner  => 'root',
+    group  => 'root',
+  }
+  service { 'omegaup-grader':
+    ensure   => $services_ensure,
+    enable   => true,
+    provider => 'systemd',
+    require  => [File['/etc/systemd/system/omegaup-grader.service',
+                      '/var/lib/omegaup/input', '/var/lib/omegaup/cache',
+                      '/var/lib/omegaup/grade', '/var/log/omegaup/service.log',
+                      '/var/log/omegaup/tracing.json',
+                      '/etc/omegaup/grader/config.json'],
+                 Omegaup::Certmanager::Cert['/etc/omegaup/grader/key.pem']],
+  }
+}
+
+# vim:expandtab ts=2 sw=2

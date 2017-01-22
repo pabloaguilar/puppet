@@ -1,0 +1,16 @@
+{
+	"Logging": {
+		"File": "/var/log/omegaup/runner.log"
+	},
+	"Runner": {
+		"RuntimePath": "/var/lib/omegaup/runner",
+		"GraderURL": "<%= @grader_host %>"
+	},
+	"TLS": {
+		"CertFile": "/etc/omegaup/runner/certificate.pem",
+		"KeyFile": "/etc/omegaup/runner/key.pem"
+	},
+	"Tracing": {
+		"File": "/var/log/omegaup/runner.tracing.json"
+	}
+}
