@@ -5,7 +5,6 @@ class omegaup::developer_environment (
   $mysql_user,
   $mysql_password,
 ) {
-  include omegaup::java
   include pear
 
   # Packages
@@ -20,24 +19,6 @@ class omegaup::developer_environment (
   package { 'https://github.com/google/closure-linter/zipball/master':
     ensure   => present,
     provider => 'pip',
-  }
-
-  # SBT
-  exec { 'update-ca-certificates':
-    command => '/usr/sbin/update-ca-certificates -f',
-    creates => "${::omegaup::java::jre_directory}/lib/security/cacerts",
-    require => [Package['ca-certificates'], Package[$::omegaup::java::jre_package]],
-  }
-  file { '/usr/bin/sbt':
-    ensure  => 'file',
-    source  => 'puppet:///modules/omegaup/sbt',
-    owner   => 'root',
-    group   => 'root',
-    mode    => 'a+x',
-    require => Exec['update-ca-certificates'],
-  }
-  omegaup::remote_file { '/usr/bin/sbt-launch.jar':
-    source => 'https://repo.typesafe.com/typesafe/ivy-releases/org.scala-sbt/sbt-launch/0.13.7/sbt-launch.jar',
   }
 
   # Test setup

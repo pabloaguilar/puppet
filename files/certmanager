@@ -77,24 +77,11 @@ EOF
 			-CAcreateserial -CAkey $ROOT/ca.key -out $DIR/cert.crt
 	fi
 
-	if [ "$FORMAT" == "jks" ]; then
-		CA_NAME=$(openssl x509 -in $ROOT/ca.crt -noout -subject | \
-			sed -n '/^subject/s/^.*CN=//p')
-		/usr/bin/openssl pkcs12 -export -in $DIR/cert.crt \
-			-inkey $DIR/cert.key -name "$CN" -certfile $ROOT/ca.crt \
-			-caname "$CA_NAME" -password "pass:$PASSWORD" -out $DIR/cert.p12
-		/usr/bin/keytool -importkeystore -srckeystore $DIR/cert.p12 \
-			-srcstoretype pkcs12 -srcstorepass "$PASSWORD" -srcalias "$CN" \
-			-destkeystore $TARGET -deststoretype jks -deststorepass "$PASSWORD"
-		/usr/bin/keytool -importcert -alias "$CA_NAME" -noprompt \
-			-trustcacerts -keystore $TARGET -storepass "$PASSWORD" -file $ROOT/ca.crt
+	if [ -n $CERT_TARGET ]; then
+		cp $DIR/cert.key $TARGET
+		cat $DIR/cert.crt $ROOT/ca.crt > $CERT_TARGET
 	else
-		if [ -n $CERT_TARGET ]; then
-			cp $DIR/cert.key $TARGET
-			cat $DIR/cert.crt $ROOT/ca.crt > $CERT_TARGET
-		else
-			cat $DIR/cert.key $DIR/cert.crt $ROOT/ca.crt > $TARGET
-		fi
+		cat $DIR/cert.key $DIR/cert.crt $ROOT/ca.crt > $TARGET
 	fi
 
 	SERIAL=`openssl x509 -in $DIR/cert.crt -noout -serial | sed -e 's/serial=//'`

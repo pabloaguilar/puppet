@@ -38,13 +38,6 @@ omegaup::certmanager::cert { '/etc/omegaup/frontend/certificate.pem':
   owner    => 'www-data',
   require  => [File['/etc/omegaup/frontend'], User['www-data']],
 }
-omegaup::certmanager::cert { '/etc/omegaup/grader/keystore.jks':
-  hostname => 'localhost',
-  mode     => '0600',
-  owner    => 'omegaup',
-  password => $keystore_password,
-  require  => [File['/etc/omegaup/grader'], User['omegaup']],
-}
 
 class { '::omegaup':
   development_environment => true,
