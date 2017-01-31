@@ -1,14 +1,16 @@
+# The omegaUp broadcaster service.
 class omegaup::services::broadcaster (
   $services_ensure = running,
   $hostname = 'localhost',
   $frontend_host = 'http://localhost',
   $scoreboard_update_secret = 'secret',
+  $keystore_password = 'omegaup',
 ) {
   include omegaup::users
 
   # Configuration
   file { '/etc/omegaup/broadcaster':
-    ensure => 'directory',
+    ensure  => 'directory',
     require => File['/etc/omegaup'],
   }
   file { '/etc/omegaup/broadcaster/config.json':
@@ -29,7 +31,8 @@ class omegaup::services::broadcaster (
   }
 
   # Runtime files
-  file { ['/var/log/omegaup/broadcaster.log', '/var/log/omegaup/broadcaster.tracing.json']:
+  file { ['/var/log/omegaup/broadcaster.log',
+          '/var/log/omegaup/broadcaster.tracing.json']:
     ensure  => 'file',
     owner   => 'omegaup',
     group   => 'omegaup',
@@ -48,11 +51,16 @@ class omegaup::services::broadcaster (
     ensure   => $services_ensure,
     enable   => true,
     provider => 'systemd',
-    require  => [File['/etc/systemd/system/omegaup-broadcaster.service',
-                      '/var/log/omegaup/broadcaster.log',
-                      '/var/log/omegaup/broadcaster.tracing.json',
-                      '/etc/omegaup/broadcaster/config.json'],
-                 Omegaup::Certmanager::Cert['/etc/omegaup/broadcaster/key.pem']],
+    require  => [
+      File[
+        '/etc/systemd/system/omegaup-broadcaster.service',
+        '/usr/bin/omegaup-broadcaster',
+        '/var/log/omegaup/broadcaster.log',
+        '/var/log/omegaup/broadcaster.tracing.json',
+        '/etc/omegaup/broadcaster/config.json'
+      ],
+      Omegaup::Certmanager::Cert['/etc/omegaup/broadcaster/key.pem'],
+    ],
   }
 }
 

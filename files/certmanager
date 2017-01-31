@@ -33,16 +33,16 @@ gen_cert() {
 	FORMAT=${TARGET##*.}
 	DIR=`mktemp -d`
 
-	if [ -f $TARGET ]; then
-		rm $TARGET
+	if [ -n "${TARGET}" && -f "${TARGET}" ]; then
+		rm "${TARGET}"
 	fi
-	if [ -n $CERT_TARGET -a -f $CERT_TARGET ]; then
-		rm $CERT_TARGET
+	if [ -n "${CERT_TARGET}" && -f "${CERT_TARGET}" ]; then
+		rm "${CERT_TARGET}"
 	fi
 
-	/usr/bin/openssl genrsa -out $DIR/cert.key 2048
-	if [ $IP_ADDR -eq 1 ]; then
-		/usr/bin/openssl req -new -key $DIR/cert.key -out $DIR/cert.csr \
+	/usr/bin/openssl genrsa -out "${DIR}/cert.key" 2048
+	if [ "${IP_ADDR}" -eq 1 ]; then
+		/usr/bin/openssl req -new -key $\DIR/cert.key -out ${DIR}/cert.csr \
 			-config <(
 cat <<EOF
 [req]
@@ -59,50 +59,52 @@ subjectAltName=IP:$CN
 EOF
 		)
 	else
-		/usr/bin/openssl req -new -subj "/C=$C/CN=$CN" -key $DIR/cert.key \
-			-out $DIR/cert.csr
+		/usr/bin/openssl req -new -subj "/C=$C/CN=$CN" -key "${DIR}/cert.key" \
+			-out "${DIR}/cert.csr"
 	fi
 
-	if [ $IP_ADDR -eq 1 ]; then
-		/usr/bin/openssl x509 -req -days 3650 -in $DIR/cert.csr -CA $ROOT/ca.crt \
-			-CAcreateserial -CAkey $ROOT/ca.key -out $DIR/cert.crt \
-			-extensions req_ext -extfile <(
+	if [ "${IP_ADDR}" -eq 1 ]; then
+		/usr/bin/openssl x509 -req -days 3650 -in "${DIR}/cert.csr" \
+			-CA "${ROOT}/ca.crt" -CAcreateserial -CAkey "${ROOT}/ca.key" \
+			-out "${DIR}/cert.crt" -extensions req_ext -extfile <(
 cat <<EOF
 [req_ext]
-subjectAltName=IP:$CN
+subjectAltName=IP:${CN}
 EOF
 		)
 	else
-		/usr/bin/openssl x509 -req -days 3650 -in $DIR/cert.csr -CA $ROOT/ca.crt \
-			-CAcreateserial -CAkey $ROOT/ca.key -out $DIR/cert.crt
+		/usr/bin/openssl x509 -req -days 3650 -in "${DIR}/cert.csr" \
+			-CA "${ROOT}/ca.crt" -CAcreateserial -CAkey "${ROOT}/ca.key" \
+			-out "${DIR}/cert.crt"
 	fi
 
-	if [ -n $CERT_TARGET ]; then
-		cp $DIR/cert.key $TARGET
-		cat $DIR/cert.crt $ROOT/ca.crt > $CERT_TARGET
+	if [ -n "${CERT_TARGET}" ]; then
+		cp "${DIR}/cert.key" "${TARGET}"
+		cat "${DIR}/cert.crt" "${ROOT}/ca.crt" > "${CERT_TARGET}"
 	else
-		cat $DIR/cert.key $DIR/cert.crt $ROOT/ca.crt > $TARGET
+		cat "${DIR}/cert.key" "${DIR}/cert.crt" "${ROOT}/ca.crt" > "${TARGET}"
 	fi
 
-	SERIAL=`openssl x509 -in $DIR/cert.crt -noout -serial | sed -e 's/serial=//'`
+	SERIAL=`openssl x509 -in "${DIR}/cert.crt" -noout -serial | \
+		sed -e 's/serial=//'`
 
-	cp $DIR/cert.key $ROOT/${CN}-${SERIAL}.key
-	cp $DIR/cert.crt $ROOT/${CN}-${SERIAL}.crt
+	cp "${DIR}/cert.key" "${ROOT}/${CN}-${SERIAL}.key"
+	cp "${DIR}/cert.crt" "${ROOT}/${CN}-${SERIAL}.crt"
 
-	rm -rf $DIR
+	rm -rf "${DIR}"
 }
 
 gen_ca() {
 	CN=$1
 
-	if [ -d $ROOT ]; then
-		rm -rf $ROOT/*
+	if [ -d "${ROOT}" ]; then
+		rm -rf ${ROOT}/*
 	fi
 
-	mkdir -p $ROOT
-	/usr/bin/openssl genrsa -out $ROOT/ca.key 4096
-	/usr/bin/openssl req -new -subj "/C=$C/CN=$CN" -x509 -days 3650 \
-		-key $ROOT/ca.key -out $ROOT/ca.crt
+	mkdir -p "${ROOT}"
+	/usr/bin/openssl genrsa -out "${ROOT}/ca.key" 4096
+	/usr/bin/openssl req -new -subj "/C=${C}/CN=${CN}" -x509 -days 3650 \
+		-key "${ROOT}/ca.key" -out "${ROOT}/ca.crt"
 }
 
 COMMAND=$1
@@ -127,7 +129,7 @@ while [[ $# > 1 ]]; do
 			;;
 		-h|--hostname)
 			HOSTNAME="$1"
-			IP_ADDR=`echo $HOSTNAME | grep '^[0-9]\+\(\.[0-9]\+\)\{3\}$' | wc -l`
+			IP_ADDR=`echo "${HOSTNAME}" | grep '^[0-9]\+\(\.[0-9]\+\)\{3\}$' | wc -l`
 			shift || usage
 			;;
 		-o|--output)
@@ -148,18 +150,18 @@ while [[ $# > 1 ]]; do
 	esac
 done
 
-case $COMMAND in
+case "${COMMAND}" in
 	init)
-		if [ "$CA_NAME" == "" ]; then
+		if [ "${CA_NAME}" == "" ]; then
 			usage
 		fi
-		gen_ca "$CA_NAME"
+		gen_ca "${CA_NAME}"
 		;;
 	cert)
-		if [ \( "$HOSTNAME" == "" \) -o \( "$OUTPUT" == "" \) ] ; then
+		if [ \( "${HOSTNAME}" == "" \) -o \( "${OUTPUT}" == "" \) ] ; then
 			usage
 		fi
-		gen_cert "$HOSTNAME" "$OUTPUT" "$CERT_OUTPUT"
+		gen_cert "${HOSTNAME}" "${OUTPUT}" "${CERT_OUTPUT}"
 		;;
 	*)
 		usage

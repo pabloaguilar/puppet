@@ -113,7 +113,7 @@ class omegaup (
     ensure  => absent,
     require => Package['nginx'],
   }
-  nginx::resource::vhost { 'omegaup':
+  nginx::resource::server { 'omegaup':
     ensure            => present,
     listen_port       => 80,
     index_files       => ['index.php', 'index.html'],
@@ -121,14 +121,14 @@ class omegaup (
     error_pages       => {
       404 => '/404.html',
     },
-    vhost_cfg_prepend => {
+    server_cfg_prepend => {
       root => "${root}/frontend/www",
     },
     require           => File['/etc/nginx/conf.d/default.conf'],
   }
   nginx::resource::location { 'php':
     ensure               => present,
-    vhost                => 'omegaup',
+    server               => 'omegaup',
     location             => '~ \.(hh|php)$',
     fastcgi              => '127.0.0.1:9000',
     proxy                => undef,

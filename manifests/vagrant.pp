@@ -9,6 +9,7 @@ class { '::omegaup::certmanager': }
 file { '/etc/omegaup': ensure => 'directory' }
 
 class { '::omegaup::minijail': }
+class { '::omegaup::services': }
 class { '::omegaup::services::grader': }
 class { '::omegaup::services::runner': }
 class { '::omegaup::services::broadcaster': }

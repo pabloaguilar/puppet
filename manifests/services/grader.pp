@@ -1,3 +1,4 @@
+# The omegaUp grader service.
 class omegaup::services::grader (
   $user = 'vagrant',
   $hostname = 'localhost',
@@ -14,9 +15,21 @@ class omegaup::services::grader (
   include omegaup::scripts
   include omegaup::directories
 
+  # libinteractive
+  package { 'openjdk-8-jre-headless':
+    ensure => installed,
+  }
+  remote_file { '/usr/share/java/libinteractive.jar':
+    source  => 'https://github.com/omegaup/libinteractive/releases/download/v2.0.19/libinteractive.jar',
+    mode    => 0644,
+    owner   => 'root',
+    group   => 'root',
+    require => Package['openjdk-8-jre-headless'],
+  }
+
   # Configuration
   file { '/etc/omegaup/grader':
-    ensure => 'directory',
+    ensure  => 'directory',
     require => File['/etc/omegaup'],
   }
   file { '/etc/omegaup/grader/config.json':
@@ -37,6 +50,9 @@ class omegaup::services::grader (
   }
 
   # Runtime files
+  package { ['libhttp-parser2.1', 'libssh2-1']:
+    ensure => installed,
+  }
   file { ['/var/log/omegaup/service.log', '/var/log/omegaup/tracing.json']:
     ensure  => 'file',
     owner   => 'omegaup',
@@ -63,12 +79,19 @@ class omegaup::services::grader (
     ensure   => $services_ensure,
     enable   => true,
     provider => 'systemd',
-    require  => [File['/etc/systemd/system/omegaup-grader.service',
-                      '/var/lib/omegaup/input', '/var/lib/omegaup/cache',
-                      '/var/lib/omegaup/grade', '/var/log/omegaup/service.log',
-                      '/var/log/omegaup/tracing.json',
-                      '/etc/omegaup/grader/config.json'],
-                 Omegaup::Certmanager::Cert['/etc/omegaup/grader/key.pem']],
+    require  => [
+      File[
+        '/etc/systemd/system/omegaup-grader.service',
+        '/var/lib/omegaup/input', '/var/lib/omegaup/cache',
+        '/var/lib/omegaup/grade', '/var/log/omegaup/service.log',
+        '/usr/share/java/libinteractive.jar',
+        '/usr/bin/omegaup-grader',
+        '/var/log/omegaup/tracing.json',
+        '/etc/omegaup/grader/config.json'
+      ],
+      Omegaup::Certmanager::Cert['/etc/omegaup/grader/key.pem'],
+      Package['libhttp-parser2.1', 'libssh2-1'],
+    ],
   }
 }
 

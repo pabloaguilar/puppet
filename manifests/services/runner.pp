@@ -1,3 +1,4 @@
+# The omegaUp runner service.
 class omegaup::services::runner (
   $services_ensure = running,
   $hostname = 'localhost',
@@ -8,7 +9,7 @@ class omegaup::services::runner (
 
   # Configuration
   file { '/etc/omegaup/runner':
-    ensure => 'directory',
+    ensure  => 'directory',
     require => File['/etc/omegaup'],
   }
   file { '/etc/omegaup/runner/config.json':
@@ -35,7 +36,8 @@ class omegaup::services::runner (
     group   => 'omegaup',
     require => File['/var/lib/omegaup'],
   }
-  file { ['/var/log/omegaup/runner.log', '/var/log/omegaup/runner.tracing.json']:
+  file { ['/var/log/omegaup/runner.log',
+          '/var/log/omegaup/runner.tracing.json']:
     ensure  => 'file',
     owner   => 'omegaup',
     group   => 'omegaup',
@@ -54,12 +56,15 @@ class omegaup::services::runner (
     ensure   => $services_ensure,
     enable   => true,
     provider => 'systemd',
-    require  => [File['/etc/systemd/system/omegaup-runner.service',
-                      '/etc/sudoers.d/minijail', '/var/lib/omegaup/runner',
-                      '/var/log/omegaup/runner.log',
-                      '/var/log/omegaup/runner.tracing.json',
-                      '/etc/omegaup/runner/config.json'],
-                 Omegaup::Certmanager::Cert['/etc/omegaup/runner/key.pem']],
+    require  => [
+      File[
+        '/etc/systemd/system/omegaup-runner.service', '/usr/bin/omegaup-runner',
+        '/etc/sudoers.d/minijail', '/var/lib/omegaup/runner',
+        '/var/log/omegaup/runner.log', '/var/log/omegaup/runner.tracing.json',
+        '/etc/omegaup/runner/config.json'
+      ],
+      Omegaup::Certmanager::Cert['/etc/omegaup/runner/key.pem'],
+    ],
   }
 }
 
