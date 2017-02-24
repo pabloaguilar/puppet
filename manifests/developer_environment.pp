@@ -10,7 +10,7 @@ class omegaup::developer_environment (
   # Packages
   package { [ 'vim', 'phpunit', 'openssh-client', 'gcc', 'g++', 'python3',
               'clang-format-3.7', 'python-pip', 'silversearcher-ag',
-              'ca-certificates', 'meld', 'vim-gtk' ]:
+              'ca-certificates', 'meld', 'vim-gtk', 'yarn', 'nodejs' ]:
     ensure  => present,
   }
   pear::package { 'PHP_CodeSniffer':
