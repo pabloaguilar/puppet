@@ -1,7 +1,7 @@
 # The omegaUp services.
 class omegaup::services {
   remote_file { '/var/lib/omegaup/omegaup-backend.tar.xz':
-    source  => 'https://omegaup.com/omegaup-backend.tar.xz',
+    source  => 'https://omegaup-dist.s3.amazonaws.com/omegaup-backend.tar.xz',
     mode    => 0644,
     owner   => 'root',
     group   => 'root',
