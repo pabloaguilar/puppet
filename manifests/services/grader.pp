@@ -1,6 +1,6 @@
 # The omegaUp grader service.
 class omegaup::services::grader (
-  $user = 'vagrant',
+  $user = undef,
   $hostname = 'localhost',
   $embedded_runner = true,
   $broadcaster_host = 'https://localhost:32672',

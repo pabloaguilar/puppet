@@ -10,7 +10,9 @@ file { '/etc/omegaup': ensure => 'directory' }
 
 class { '::omegaup::minijail': }
 class { '::omegaup::services': }
-class { '::omegaup::services::grader': }
+class { '::omegaup::services::grader':
+  user => $user,
+}
 class { '::omegaup::services::runner': }
 class { '::omegaup::services::broadcaster': }
 
@@ -27,6 +29,7 @@ file { '/etc/omegaup/frontend':
 class { '::omegaup':
   development_environment => true,
   mysql_password          => $mysql_password,
+  user                    => $user,
   require                 => [Class['::omegaup::database'],
                               Class['::omegaup::apt_sources']],
 }

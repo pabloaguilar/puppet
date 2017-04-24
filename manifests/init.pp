@@ -1,7 +1,7 @@
 class omegaup (
   $development_environment = false,
   $root = '/opt/omegaup',
-  $user = 'vagrant',
+  $user = undef,
   $grader_host = 'https://localhost:21680',
   $broadcaster_host = 'http://localhost:39613',
   $github_repo = 'omegaup/omegaup',
