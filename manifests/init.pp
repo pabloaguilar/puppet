@@ -150,8 +150,11 @@ class omegaup (
   dbmigrate { $root:
     ensure                  => latest,
     development_environment => $development_environment,
-    subscribe               => [Github[$root], Mysql::Db['omegaup'],
-                                Mysql::Db['omegaup-test']],
+    subscribe               => [Github[$root], Mysql::Db['omegaup']],
+  }
+
+  if $development_environment {
+    Mysql::Db['omegaup-test'] ~> Dbmigrate[$root]
   }
 
   # Development environment

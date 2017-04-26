@@ -1,8 +1,9 @@
 class { '::omegaup::apt_sources': }
 
 class { '::omegaup::database':
-  root_password => $mysql_password,
-  password      => $mysql_password,
+  development_environment => true,
+  root_password           => $mysql_password,
+  password                => $mysql_password,
 }
 
 class { '::omegaup::certmanager': }

@@ -1,6 +1,7 @@
 class omegaup::database (
   $root_password,
   $password,
+  $development_environment = false,
   $service_provider = 'systemd',
 ) {
   class { '::mysql::server':
@@ -17,11 +18,13 @@ class omegaup::database (
     grant    => ['SELECT', 'INSERT', 'UPDATE', 'DELETE'],
   }
 
-  mysql::db { 'omegaup-test':
-    user     => 'omegaup',
-    password => $password,
-    host     => 'localhost',
-    grant    => ['SELECT', 'INSERT', 'UPDATE', 'DELETE', 'DROP'],
+  if $development_environment {
+    mysql::db { 'omegaup-test':
+      user     => 'omegaup',
+      password => $password,
+      host     => 'localhost',
+      grant    => ['SELECT', 'INSERT', 'UPDATE', 'DELETE', 'DROP'],
+    }
   }
 }
 
