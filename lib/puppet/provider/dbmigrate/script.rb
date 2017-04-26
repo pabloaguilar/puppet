@@ -21,6 +21,8 @@ Puppet::Type.type(:dbmigrate).provide(:mysql, :parent => Puppet::Provider::DbMig
     args = default_args + ['migrate']
     if resource[:development_environment]
       args += ['--development-environment']
+    else
+      args += ['--databases', 'omegaup']
     end
     python3(args)
   end
