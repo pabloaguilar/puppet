@@ -5,6 +5,7 @@ class omegaup (
   $grader_host = 'https://localhost:21680',
   $broadcaster_host = 'http://localhost:39613',
   $github_repo = 'omegaup/omegaup',
+  $github_ensure = present,
   $mysql_host = 'localhost',
   $mysql_user = 'omegaup',
   $mysql_password = undef,
@@ -41,7 +42,7 @@ class omegaup (
     group  => $user,
   }
   github { $root:
-    ensure  => present,
+    ensure  => $github_ensure,
     repo    => $github_repo,
     owner   => $user,
     group   => $user,

@@ -10,7 +10,7 @@ Puppet::Type.newtype(:dbmigrate) do
     end
 
     def insync?(is)
-      return is == :latest
+      return is == should
     end
 
     newvalue :latest do
