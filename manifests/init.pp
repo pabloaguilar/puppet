@@ -3,13 +3,15 @@ class omegaup (
   $root = '/opt/omegaup',
   $user = undef,
   $grader_host = 'https://localhost:21680',
+  $hostname = 'localhost',
   $broadcaster_host = 'http://localhost:39613',
   $github_repo = 'omegaup/omegaup',
   $github_ensure = present,
   $mysql_host = 'localhost',
-  $mysql_user = 'omegaup',
   $mysql_password = undef,
+  $mysql_user = 'omegaup',
   $services_ensure = running,
+  $ssl = false,
 ) {
   include omegaup::users
   include omegaup::scripts
@@ -114,22 +116,74 @@ class omegaup (
     ensure  => absent,
     require => Package['nginx'],
   }
-  nginx::resource::server { 'omegaup':
-    ensure            => present,
-    listen_port       => 80,
-    index_files       => ['index.php', 'index.html'],
-    include_files     => ["${root}/frontend/server/nginx.rewrites"],
-    error_pages       => {
-      404 => '/404.html',
-    },
-    server_cfg_prepend => {
-      root => "${root}/frontend/www",
-    },
-    require           => File['/etc/nginx/conf.d/default.conf'],
+  $nginx_server = $ssl ? {
+    true  => "${hostname}-ssl",
+    false => $hostname,
+  }
+  if $ssl {
+    exec { "${hostname}.dhparam":
+      command => "/usr/bin/openssl dhparam -out /etc/ssl/private/${hostname}.dhparam 2048",
+      user    => 'root',
+      creates => "/etc/ssl/private/${hostname}.dhparam",
+    }
+    nginx::resource::server { $hostname:
+      ensure            => present,
+      index_files       => [],
+      listen_port       => 80,
+      rewrite_rules     => ["^ https://${hostname}\$request_uri permanent"],
+      server_name       => [$hostname],
+      require           => File['/etc/nginx/conf.d/default.conf'],
+    }
+    nginx::resource::server { "${hostname}-ssl":
+      ensure            => present,
+      listen_port       => 443,
+      listen_options    => 'spdy default_server',
+      server_name       => [$hostname],
+      ssl               => true,
+      ssl_cert          => "/etc/letsencrypt/live/${hostname}/fullchain.pem",
+      ssl_key           => "/etc/letsencrypt/live/${hostname}/privkey.pem",
+      ssl_ciphers       => 'HIGH:!aNULL:!eNULL:!LOW:!3DES:!MD5:!EXP:!PSK:!SRP:!DSS',
+      ssl_dhparam       => "/etc/ssl/private/${hostname}.dhparam",
+      index_files       => ['index.php', 'index.html'],
+      include_files     => ["${root}/frontend/server/nginx.rewrites"],
+      error_pages       => {
+        404 => '/404.html',
+      },
+      server_cfg_prepend => {
+        resolver                => '208.67.222.222 208.67.220.220 valid=300s',
+        resolver_timeout        => '5s',
+        root                    => "${root}/frontend/www",
+        ssl_stapling            => 'on',
+        ssl_stapling_verify     => 'on',
+        ssl_trusted_certificate => "/etc/letsencrypt/live/${hostname}/fullchain.pem",
+      },
+      require           => [File['/etc/nginx/conf.d/default.conf'],
+                            Exec["${hostname}.dhparam"]],
+    }
+  } else {
+    nginx::resource::server { $hostname:
+      ensure            => present,
+      server_name       => [$hostname],
+      listen_port       => 80,
+      index_files       => ['index.php', 'index.html'],
+      include_files     => ["${root}/frontend/server/nginx.rewrites"],
+      error_pages       => {
+        404 => '/404.html',
+      },
+      server_cfg_prepend => {
+        root => "${root}/frontend/www",
+      },
+      require           => File['/etc/nginx/conf.d/default.conf'],
+    }
+    nginx::resource::server { "${hostname}-ssl":
+      ensure            => absent,
+    }
   }
   nginx::resource::location { 'php':
     ensure               => present,
-    server               => 'omegaup',
+    server               => $nginx_server,
+    ssl                  => $ssl,
+    ssl_only             => $ssl,
     location             => '~ \.(hh|php)$',
     fastcgi              => '127.0.0.1:9000',
     proxy                => undef,

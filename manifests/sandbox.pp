@@ -56,6 +56,7 @@ exec { 'omegaup-uprev':
   subscribe   => [Github['/opt/omegaup-staging'],
                   File['/usr/local/bin/omegaup-uprev']],
   before      => Github[$::omegaup::root],
+  require     => User['omegaup-www'],
   refreshonly => true,
 }
 exec { 'copy-vue':
