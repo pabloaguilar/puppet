@@ -1,0 +1,13 @@
+[Unit]
+Description=omegaUp webhook service
+After=network.target
+
+[Service]
+Type=simple
+User=omegaup-deploy
+Group=omegaup-deploy
+ExecStart=/usr/bin/omegaup-webhook
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

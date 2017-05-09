@@ -1,0 +1,1 @@
+omegaup-deploy ALL = NOPASSWD: /usr/bin/omegaup-deploy-latest

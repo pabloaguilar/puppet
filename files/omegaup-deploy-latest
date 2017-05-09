@@ -1,0 +1,3 @@
+#!/bin/bash
+
+puppet apply /etc/puppet/modules/omegaup/manifests/sandbox.pp

@@ -1,0 +1,91 @@
+#!/usr/bin/python3
+
+import hmac
+import http.server
+import json
+import logging
+import subprocess
+import threading
+
+_SECRET = None
+_QUEUE = []
+_CONDITION = threading.Condition()
+
+
+class GitHubWebhookHandler(http.server.BaseHTTPRequestHandler):
+    def do_POST(self):
+        global _SECRET
+
+        try:
+            content_len = int(self.headers.get('Content-Length', 0))
+            raw_payload = self.rfile.read(content_len)
+            expected_hmac = 'sha1=%s' % hmac.new(_SECRET, raw_payload,
+                                                 digestmod='sha1').hexdigest()
+            if self.headers.get('X-Hub-Signature', '') == expected_hmac:
+                payload = json.loads(str(raw_payload, encoding='utf-8'))
+                try:
+                    self.handle_hook_event(
+                        self.headers.get('X-GitHub-Event', 'ping'), payload)
+                    self.send_response(200)
+                except:
+                    logging.exception('Error while handling the event')
+                    self.send_response(500)
+            else:
+                self.send_response(401)
+        except:
+            logging.exception('Error while reading the payload')
+            self.send_response(400)
+        finally:
+            self.end_headers()
+
+    def handle_hook_event(self, event, payload):
+        global _QUEUE, _CONDITION
+
+        logging.info('Request %s, %r', event, payload)
+        if event == 'push':
+            with _CONDITION:
+                _QUEUE.append(payload['after'])
+                _CONDITION.notify()
+
+
+class DeployThread(threading.Thread):
+    def run(self):
+        global _QUEUE, _CONDITION
+        while True:
+            with _CONDITION:
+                while not _QUEUE:
+                    _CONDITION.wait()
+
+                commit = _QUEUE.pop()
+                logging.info('Deploying %s...', commit)
+                try:
+                    subprocess.check_call(['/usr/bin/sudo',
+                                           '/usr/bin/omegaup-deploy-latest'])
+                    logging.info('Successfully deployed %s', commit)
+                except subprocess.CalledProcessError:
+                    logging.exception('Error calling omegaup-deploy-latest')
+
+
+def main():
+    global _SECRET
+
+    logging.basicConfig(level=logging.INFO)
+
+    with open('/etc/omegaup/webhook/config.json') as config_file:
+        config = json.load(config_file)
+        _SECRET = bytes(config['Secret'], encoding='utf-8')
+
+    logging.info('Starting the webhook service')
+    t = DeployThread(daemon=True)
+    t.start()
+    server_address = ('localhost', 58517)
+    logging.info('Listening on %r' % (server_address,))
+    httpd = http.server.HTTPServer(server_address, GitHubWebhookHandler)
+
+    httpd.serve_forever()
+
+
+if __name__ == '__main__':
+    main()
+
+# vim:expandtab ts=4 sw=4
