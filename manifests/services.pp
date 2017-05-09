@@ -9,9 +9,10 @@ class omegaup::services {
   }
 
   exec { 'omegaup-backend':
-    command => '/bin/tar -xf /var/lib/omegaup/omegaup-backend.tar.xz -C /',
-    user    => 'root',
-    require => File['/var/lib/omegaup/omegaup-backend.tar.xz'],
+    command     => '/bin/tar -xf /var/lib/omegaup/omegaup-backend.tar.xz -C /',
+    user        => 'root',
+    require     => File['/var/lib/omegaup/omegaup-backend.tar.xz'],
+    refreshonly => true,
   }
 
   file { ['/usr/bin/omegaup-grader', '/usr/bin/omegaup-runner',
