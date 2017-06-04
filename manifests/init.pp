@@ -135,21 +135,22 @@ class omegaup (
       require           => File['/etc/nginx/conf.d/default.conf'],
     }
     nginx::resource::server { "${hostname}-ssl":
-      ensure            => present,
-      listen_port       => 443,
-      listen_options    => 'spdy default_server',
-      server_name       => [$hostname],
-      ssl               => true,
-      ssl_cert          => "/etc/letsencrypt/live/${hostname}/fullchain.pem",
-      ssl_key           => "/etc/letsencrypt/live/${hostname}/privkey.pem",
-      ssl_ciphers       => 'HIGH:!aNULL:!eNULL:!LOW:!3DES:!MD5:!EXP:!PSK:!SRP:!DSS',
-      ssl_dhparam       => "/etc/ssl/private/${hostname}.dhparam",
-      index_files       => ['index.php', 'index.html'],
-      include_files     => ["${root}/frontend/server/nginx.rewrites"],
-      error_pages       => {
+      ensure               => present,
+      listen_port          => 443,
+      listen_options       => 'spdy default_server',
+      server_name          => [$hostname],
+      ssl                  => true,
+      ssl_cert             => "/etc/letsencrypt/live/${hostname}/fullchain.pem",
+      ssl_key              => "/etc/letsencrypt/live/${hostname}/privkey.pem",
+      ssl_ciphers          => 'HIGH:!aNULL:!eNULL:!LOW:!3DES:!MD5:!EXP:!PSK:!SRP:!DSS',
+      ssl_dhparam          => "/etc/ssl/private/${hostname}.dhparam",
+      index_files          => ['index.php', 'index.html'],
+      include_files        => ["${root}/frontend/server/nginx.rewrites"],
+      error_pages          => {
         404 => '/404.html',
       },
-      server_cfg_prepend => {
+      client_max_body_size => '100m',
+      server_cfg_prepend   => {
         resolver                => '208.67.222.222 208.67.220.220 valid=300s',
         resolver_timeout        => '5s',
         root                    => "${root}/frontend/www",
@@ -157,23 +158,24 @@ class omegaup (
         ssl_stapling_verify     => 'on',
         ssl_trusted_certificate => "/etc/letsencrypt/live/${hostname}/fullchain.pem",
       },
-      require           => [File['/etc/nginx/conf.d/default.conf'],
-                            Exec["${hostname}.dhparam"]],
+      require              => [File['/etc/nginx/conf.d/default.conf'],
+                               Exec["${hostname}.dhparam"]],
     }
   } else {
     nginx::resource::server { $hostname:
-      ensure            => present,
-      server_name       => [$hostname],
-      listen_port       => 80,
-      index_files       => ['index.php', 'index.html'],
-      include_files     => ["${root}/frontend/server/nginx.rewrites"],
-      error_pages       => {
+      ensure               => present,
+      server_name          => [$hostname],
+      listen_port          => 80,
+      index_files          => ['index.php', 'index.html'],
+      include_files        => ["${root}/frontend/server/nginx.rewrites"],
+      error_pages          => {
         404 => '/404.html',
       },
-      server_cfg_prepend => {
+      client_max_body_size => '100m',
+      server_cfg_prepend   => {
         root => "${root}/frontend/www",
       },
-      require           => File['/etc/nginx/conf.d/default.conf'],
+      require              => File['/etc/nginx/conf.d/default.conf'],
     }
     nginx::resource::server { "${hostname}-ssl":
       ensure            => absent,
