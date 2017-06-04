@@ -4,6 +4,7 @@ class omegaup::services::runner (
   $hostname = 'localhost',
   $grader_host = 'https://localhost:11302',
   $keystore_password = 'omegaup',
+  $runner_flags = '',
 ) {
   include omegaup::users
 
@@ -46,11 +47,11 @@ class omegaup::services::runner (
 
   # Service
   file { '/etc/systemd/system/omegaup-runner.service':
-    ensure => 'file',
-    source => 'puppet:///modules/omegaup/omegaup-runner.service',
-    mode   => '0644',
-    owner  => 'root',
-    group  => 'root',
+    ensure  => 'file',
+    mode    => '0644',
+    owner   => 'root',
+    group   => 'root',
+    content => template('omegaup/runner/omegaup-runner.service.erb'),
   }
   service { 'omegaup-runner':
     ensure   => $services_ensure,
