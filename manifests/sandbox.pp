@@ -2,6 +2,12 @@ hiera_include('classes')
 
 file { '/etc/omegaup': ensure => 'directory' }
 
+host { 'localhost':
+  ensure => present,
+  name   => hiera('omegaup_hostname'),
+  ip     => '127.0.0.1',
+}
+
 omegaup::certmanager::cert { '/etc/omegaup/frontend/certificate.pem':
   owner    => 'www-data',
   mode     => '0600',
