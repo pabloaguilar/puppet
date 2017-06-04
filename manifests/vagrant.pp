@@ -12,7 +12,8 @@ file { '/etc/omegaup': ensure => 'directory' }
 class { '::omegaup::minijail': }
 class { '::omegaup::services': }
 class { '::omegaup::services::grader':
-  user => $user,
+  mysql_password => $mysql_password,
+  user           => $user,
 }
 class { '::omegaup::services::runner': }
 class { '::omegaup::services::broadcaster': }

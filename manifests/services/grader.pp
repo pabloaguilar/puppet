@@ -6,9 +6,10 @@ class omegaup::services::grader (
   $broadcaster_host = 'https://localhost:32672',
   $frontend_host = 'http://localhost',
   $keystore_password = 'omegaup',
-  $mysql_user = 'omegaup',
   $mysql_db = 'omegaup',
   $mysql_host = 'localhost',
+  $mysql_password = undef,
+  $mysql_user = 'omegaup',
   $services_ensure = running,
 ) {
   include omegaup::users
