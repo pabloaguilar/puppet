@@ -30,7 +30,7 @@ Puppet::Type.type(:dbmigrate).provide(:mysql, :parent => Puppet::Provider::DbMig
   def default_args
     scriptname = "#{resource[:name]}/stuff/db-migrate.py"
     if File.file?("#{Facter.value(:root_home)}/.my.cnf")
-      [scriptname, "--config-file=#{Facter.value(:root_home)}/.my.cnf"]
+      [scriptname, "--mysql-config-file=#{Facter.value(:root_home)}/.my.cnf"]
     else
       [scriptname]
     end
