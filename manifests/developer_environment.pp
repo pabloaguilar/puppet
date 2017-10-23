@@ -8,7 +8,7 @@ class omegaup::developer_environment (
   include pear
 
   # Packages
-  package { [ 'vim', 'phpunit', 'openssh-client', 'gcc', 'g++', 'python3',
+  package { [ 'vim', 'openssh-client', 'gcc', 'g++', 'python3',
               'clang-format-3.7', 'python-pip', 'python3-six', 'python-six',
               'silversearcher-ag', 'ca-certificates', 'meld', 'vim-gtk',
               'yarn', 'nodejs' ]:
@@ -23,10 +23,6 @@ class omegaup::developer_environment (
   }
 
   # Test setup
-  file_line { 'hhvm include_path':
-    line => 'include_path = /usr/share/php:.',
-    path => '/etc/hhvm/php.ini',
-  }
   config_php { 'test settings':
     ensure   => present,
     settings => {

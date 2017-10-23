@@ -24,7 +24,7 @@ class omegaup (
   }
 
   package { 'hhvm':
-    ensure  => installed,
+    ensure  => absent,
   }
 
   # Common
@@ -187,8 +187,8 @@ class omegaup (
     server               => $nginx_server,
     ssl                  => $ssl,
     ssl_only             => $ssl,
-    location             => '~ \.(hh|php)$',
-    fastcgi              => '127.0.0.1:9000',
+    location             => '~ \.php$',
+    fastcgi              => 'unix:/run/php/php7.0-fpm.sock',
     proxy                => undef,
     fastcgi_script       => undef,
     location_cfg_prepend => {
@@ -197,10 +197,26 @@ class omegaup (
       fastcgi_keep_conn        => 'on',
     },
   }
-  service { 'hhvm':
-    ensure  => $services_ensure,
-    enable  => true,
-    require => Package['hhvm'],
+
+  # PHP
+  class { '::php':
+    ensure       => latest,
+    manage_repos => false,
+    fpm          => true,
+    pear         => $developer_environment,
+    dev          => $developer_environment,
+    phpunit      => $developer_environment,
+    settings     => {
+      'PHP/post_max_size'       => '200M',
+      'PHP/upload_max_filesize' => '200M',
+    },
+    fpm_pools     => {
+      'www'       => {
+        'listen'       => '/run/php/php7.0-fpm.sock',
+        'listen_owner' => 'www-data',
+        'listen_group' => 'www-data',
+      },
+    },
   }
 
   # Database

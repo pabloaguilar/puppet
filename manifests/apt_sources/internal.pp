@@ -1,14 +1,7 @@
 class omegaup::apt_sources::internal {
   # HHVM
   apt::source { 'hhvm':
-    location => 'http://dl.hhvm.com/ubuntu',
-    include  => {
-      src    => false,
-    },
-    key      => {
-      server => 'hkp://keyserver.ubuntu.com:80',
-      id     => '0x36aef64d0207e7eee352d4875a16e7281be7a449',
-    },
+    ensure => absent,
   }
 
   # Nginx
