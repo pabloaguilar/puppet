@@ -6,6 +6,7 @@ class omegaup::services::grader (
   $broadcaster_host = 'https://localhost:32672',
   $frontend_host = 'http://localhost',
   $keystore_password = 'omegaup',
+  $local_database = true,
   $mysql_db = 'omegaup',
   $mysql_host = 'localhost',
   $mysql_password = undef,
@@ -71,10 +72,10 @@ class omegaup::services::grader (
   # Service
   file { '/etc/systemd/system/omegaup-grader.service':
     ensure => 'file',
-    source => 'puppet:///modules/omegaup/omegaup-grader.service',
     mode   => '0644',
     owner  => 'root',
     group  => 'root',
+    content => template('omegaup/grader/omegaup-grader.service.erb'),
   }
   service { 'omegaup-grader':
     ensure   => $services_ensure,

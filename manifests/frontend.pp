@@ -20,9 +20,8 @@ file { '/etc/omegaup/frontend':
 }
 class { '::omegaup':
   github_ensure  => latest,
-  local_database => true,
-  require        => [Class['::omegaup::database'],
-                     Class['::omegaup::apt_sources']],
+  local_database => false,
+  require        => [Class['::omegaup::apt_sources']],
 }
 
 # Staging repository
@@ -52,11 +51,11 @@ github { '/opt/omegaup-staging':
   require => File['/opt/omegaup-staging'],
 }
 file { '/usr/local/bin/omegaup-uprev':
-	ensure  => 'file',
-	source  => 'puppet:///modules/omegaup/omegaup-uprev',
-	mode    => 0755,
-	owner   => 'root',
-	group   => 'root',
+  ensure  => 'file',
+  source  => 'puppet:///modules/omegaup/omegaup-uprev',
+  mode    => 0755,
+  owner   => 'root',
+  group   => 'root',
 }
 exec { 'omegaup-uprev':
   command     => '/usr/local/bin/omegaup-uprev',

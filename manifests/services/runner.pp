@@ -60,9 +60,8 @@ class omegaup::services::runner (
     require  => [
       File[
         '/etc/systemd/system/omegaup-runner.service', '/usr/bin/omegaup-runner',
-        '/etc/sudoers.d/minijail', '/var/lib/omegaup/runner',
-        '/var/log/omegaup/runner.log', '/var/log/omegaup/runner.tracing.json',
-        '/etc/omegaup/runner/config.json'
+        '/var/lib/omegaup/runner', '/var/log/omegaup/runner.log',
+        '/var/log/omegaup/runner.tracing.json', '/etc/omegaup/runner/config.json'
       ],
       Omegaup::Certmanager::Cert['/etc/omegaup/runner/key.pem'],
     ],

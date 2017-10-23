@@ -19,7 +19,6 @@ class { 'pre':
 }
 
 class { '::omegaup::apt_sources': }
-class { '::omegaup::minijail': }
 class { '::omegaup::runner': }
 
 # vim:expandtab ts=2 sw=2

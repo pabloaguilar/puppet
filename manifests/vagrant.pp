@@ -9,7 +9,6 @@ class { '::omegaup::database':
 class { '::omegaup::certmanager': }
 file { '/etc/omegaup': ensure => 'directory' }
 
-class { '::omegaup::minijail': }
 class { '::omegaup::services': }
 class { '::omegaup::services::grader':
   mysql_password => $mysql_password,
@@ -30,6 +29,7 @@ file { '/etc/omegaup/frontend':
 }
 class { '::omegaup':
   development_environment => true,
+  local_database          => true,
   mysql_password          => $mysql_password,
   user                    => $user,
   require                 => [Class['::omegaup::database'],

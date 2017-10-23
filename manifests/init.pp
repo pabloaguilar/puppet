@@ -2,6 +2,7 @@ class omegaup (
   $development_environment = false,
   $root = '/opt/omegaup',
   $user = undef,
+  $local_database = false,
   $grader_host = 'https://localhost:21680',
   $hostname = 'localhost',
   $broadcaster_host = 'http://localhost:39613',
@@ -18,7 +19,7 @@ class omegaup (
   include omegaup::directories
 
   # Packages
-  package { ['git', 'curl', 'unzip', 'zip']:
+  package { ['git', 'curl', 'unzip', 'zip', 'sudo']:
     ensure  => installed,
   }
 
@@ -137,7 +138,7 @@ class omegaup (
     nginx::resource::server { "${hostname}-ssl":
       ensure               => present,
       listen_port          => 443,
-      listen_options       => 'spdy default_server',
+      listen_options       => 'http2 default_server',
       server_name          => [$hostname],
       ssl                  => true,
       ssl_cert             => "/etc/letsencrypt/live/${hostname}/fullchain.pem",
@@ -203,14 +204,16 @@ class omegaup (
   }
 
   # Database
-  dbmigrate { $root:
-    ensure                  => latest,
-    development_environment => $development_environment,
-    subscribe               => [Github[$root], Mysql::Db['omegaup']],
-  }
+  if $local_database {
+    dbmigrate { $root:
+      ensure                  => latest,
+      development_environment => $development_environment,
+      subscribe               => [Github[$root], Mysql::Db['omegaup']],
+    }
 
-  if $development_environment {
-    Mysql::Db['omegaup-test'] ~> Dbmigrate[$root]
+    if $development_environment {
+      Mysql::Db['omegaup-test'] ~> Dbmigrate[$root]
+    }
   }
 
   # Development environment

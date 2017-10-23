@@ -19,10 +19,7 @@ class omegaup::apt_sources::internal {
   }
 
   # omegaUp
-  if $::lsbdistcodename != 'trusty' {
-    # minijail is not supported on trusty.
-    apt::ppa { 'ppa:omegaup/omegaup': }
-  }
+  apt::ppa { 'ppa:omegaup/omegaup': }
 
   # NPM/yarn
   apt::source { 'nodesource':
