@@ -41,10 +41,12 @@ Puppet::Type.type(:github).provide(:git, :parent => Puppet::Provider::GitHub) do
 
   def create
     Dir.chdir(@resource[:path]) do
-      execute([command(:git), 'clone',
-             "https://github.com/#{@resource[:repo]}.git",
-             '-o', @resource[:origin], '-b', @resource[:branch], '.'],
-             { :failonfail => true, :uid => uid, :gid => gid })
+      if !exists?
+        execute([command(:git), 'clone',
+               "https://github.com/#{@resource[:repo]}.git",
+               '-o', @resource[:origin], '-b', @resource[:branch], '.'],
+               { :failonfail => true, :uid => uid, :gid => gid })
+      end
       execute([command(:git), 'submodule', 'update', '--init', '--recursive'],
              { :failonfail => true, :uid => uid, :gid => gid })
     end
