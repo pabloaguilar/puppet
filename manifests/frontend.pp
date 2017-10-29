@@ -22,6 +22,9 @@ class { '::omegaup':
   github_ensure  => latest,
   require        => [Class['::omegaup::apt_sources']],
 }
+class { '::omegaup::apt_sources':
+  use_newrelic => true,
+}
 
 # Staging repository
 file { '/opt/nvm':
@@ -79,5 +82,8 @@ exec { 'delete-templates':
   subscribe   => Github[$::omegaup::root],
   refreshonly => true,
 }
+
+# New Relic
+class { '::omegaup::new_relic': }
 
 # vim:expandtab ts=2 sw=2

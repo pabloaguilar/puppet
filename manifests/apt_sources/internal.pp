@@ -1,4 +1,6 @@
-class omegaup::apt_sources::internal {
+class omegaup::apt_sources::internal (
+  $use_newrelic,
+) {
   # HHVM
   apt::source { 'hhvm':
     ensure => absent,
@@ -35,6 +37,33 @@ class omegaup::apt_sources::internal {
       key_location => 'https://dl.yarnpkg.com/debian/pubkey.gpg',
       id           => '72ECF46A56B4AD39C907BBB71646B01B86E50310',
     },
+  }
+
+  # NewRelic
+  if ($use_newrelic) {
+    apt::source { 'newrelic-infra':
+      location       => 'https://download.newrelic.com/infrastructure_agent/linux/apt',
+      architecture   => 'amd64',
+      include        => {
+        src          => false,
+      },
+      key            => {
+        key_location => 'https://download.newrelic.com/infrastructure_agent/gpg/newrelic-infra.gpg',
+        id           => 'A758B3FBCD43BE8D123A3476BB29EE038ECCE87C',
+      },
+    }
+    apt::source { 'newrelic':
+      location => 'http://apt.newrelic.com/debian/',
+      release  => 'newrelic',
+      repos    => 'non-free',
+      include  => {
+        src    => false,
+      },
+      key      => {
+        key_location => 'https://download.newrelic.com/548C16BF.gpg',
+        id           => 'B60A3EC9BC013B9C23790EC8B31B29E5548C16BF',
+      },
+    }
   }
 }
 
