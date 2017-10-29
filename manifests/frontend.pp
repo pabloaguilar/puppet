@@ -20,7 +20,6 @@ file { '/etc/omegaup/frontend':
 }
 class { '::omegaup':
   github_ensure  => latest,
-  local_database => false,
   require        => [Class['::omegaup::apt_sources']],
 }
 

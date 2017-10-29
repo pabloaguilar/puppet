@@ -242,6 +242,8 @@ class omegaup (
       subscribe               => [Github[$root], Mysql::Db['omegaup']],
     }
 
+    Mysql::Db['omegaup'] -> Class['nginx']
+
     if $development_environment {
       Mysql::Db['omegaup-test'] ~> Dbmigrate[$root]
     }
