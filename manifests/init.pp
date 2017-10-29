@@ -224,8 +224,9 @@ class omegaup (
       mcrypt       => {
         provider   => 'apt',
       },
-      mysqli       => {
-        provider   => 'none',
+      mysql        => {
+        provider   => 'apt',
+        so_name    => 'mysqli',
       },
       zip          => {
         provider   => 'apt',
