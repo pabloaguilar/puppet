@@ -203,9 +203,6 @@ class omegaup (
     ensure       => latest,
     manage_repos => false,
     fpm          => true,
-    pear         => $developer_environment,
-    dev          => $developer_environment,
-    phpunit      => $developer_environment,
     settings     => {
       'PHP/post_max_size'       => '200M',
       'PHP/upload_max_filesize' => '200M',
@@ -215,6 +212,23 @@ class omegaup (
         'listen'       => '/run/php/php7.0-fpm.sock',
         'listen_owner' => 'www-data',
         'listen_group' => 'www-data',
+      },
+    },
+    extensions   => {
+      curl         => {
+        provider   => 'apt',
+      },
+      mbstring     => {
+        provider   => 'apt',
+      },
+      mcrypt       => {
+        provider   => 'apt',
+      },
+      mysqli       => {
+        provider   => 'none',
+      },
+      zip          => {
+        provider   => 'apt',
       },
     },
   }
@@ -240,7 +254,7 @@ class omegaup (
       mysql_host     => $mysql_host,
       mysql_user     => $mysql_user,
       mysql_password => $mysql_password,
-      require        => [Github[$root], Package['hhvm']],
+      require        => [Github[$root]],
     }
   }
 

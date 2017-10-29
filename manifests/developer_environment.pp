@@ -5,8 +5,6 @@ class omegaup::developer_environment (
   $mysql_user,
   $mysql_password,
 ) {
-  include pear
-
   # Packages
   package { [ 'vim', 'openssh-client', 'gcc', 'g++', 'python3',
               'clang-format-3.7', 'python-pip', 'python3-six', 'python-six',
@@ -14,9 +12,16 @@ class omegaup::developer_environment (
               'yarn', 'nodejs' ]:
     ensure  => present,
   }
-  pear::package { 'PHP_CodeSniffer':
-    version => '2.6.2',
+  php::extension { 'PHP_CodeSniffer':
+    ensure   => '2.9.1',
+    sapi     => 'none',
+    provider => 'pear',
   }
+  Anchor['php::begin'] -> class { '::php::phpunit':
+    source      => 'https://phar.phpunit.de/phpunit-5.3.4.phar',
+    auto_update => false,
+    path        => '/usr/bin/phpunit',
+  } -> Anchor['php::end']
   package { 'https://github.com/google/closure-linter/zipball/master':
     ensure   => present,
     provider => 'pip',
