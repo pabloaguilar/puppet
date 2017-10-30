@@ -19,6 +19,22 @@ class omegaup::new_relic (
     require  => Package['newrelic-infra'],
   }
 
+  # New Relic sysmond
+  package { 'newrelic-sysmond':
+    require => Apt::Source['newrelic'],
+  }
+  service { 'newrelic-sysmond':
+    ensure   => running,
+    require  => Package['newrelic-sysmond'],
+  }
+  ini_setting { 'nrsysmond.cfg license':
+    path    => '/etc/newrelic/nrsysmond.cfg',
+    setting => 'license_key',
+    value   => $license_key,
+    require => Package['newrelic-sysmond'],
+    notify  => Service['newrelic-sysmond'],
+  }
+
   # New Relic PHP extension
   php::extension { 'newrelic-php5':
     provider           => 'apt',
