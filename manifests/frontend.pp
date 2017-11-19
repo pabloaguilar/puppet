@@ -23,7 +23,8 @@ class { '::omegaup':
   require        => [Class['::omegaup::apt_sources']],
 }
 class { '::omegaup::apt_sources':
-  use_newrelic => true,
+  use_newrelic      => true,
+  use_elastic_beats => true,
 }
 
 # Staging repository
@@ -85,5 +86,10 @@ exec { 'delete-templates':
 
 # New Relic
 class { '::omegaup::new_relic': }
+
+# Filebeat
+class { '::omegaup::filebeat':
+  template => 'omegaup/filebeat/frontend.yml.erb',
+}
 
 # vim:expandtab ts=2 sw=2
