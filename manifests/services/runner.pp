@@ -8,6 +8,25 @@ class omegaup::services::runner (
 ) {
   include omegaup::users
 
+  remote_file { '/var/lib/omegaup/omegajail-xenial-distrib-x86_64.tar.bz2':
+    url      => 'https://omegaup-omegajail.s3.amazonaws.com/omegajail-xenial-distrib-x86_64.tar.bz2',
+    sha1hash => '415d9ff35d04318f05395d8d750ff19e4e40e62e',
+    mode     => 644,
+    owner    => 'root',
+    group    => 'root',
+    require  => File['/var/lib/omegaup'],
+  }
+  exec { 'omegajail-distrib':
+    command     => '/bin/tar -xf /var/lib/omegaup/omegajail-xenial-distrib-x86_64.tar.bz2 -C /',
+    user        => 'root',
+    notify      => File['/var/lib/omegajail/bin/omegajail'],
+    subscribe   => Remote_File['/var/lib/omegaup/omegajail-xenial-distrib-x86_64.tar.bz2'],
+    refreshonly => true,
+  }
+  file { '/var/lib/omegajail/bin/omegajail':
+    require => Exec['omegajail-distrib'],
+  }
+
   # Configuration
   file { '/etc/omegaup/runner':
     ensure  => 'directory',
@@ -54,14 +73,22 @@ class omegaup::services::runner (
     content => template('omegaup/runner/omegaup-runner.service.erb'),
   }
   service { 'omegaup-runner':
-    ensure   => $services_ensure,
-    enable   => true,
-    provider => 'systemd',
-    require  => [
+    ensure    => $services_ensure,
+    enable    => true,
+    provider  => 'systemd',
+    subscribe => [
+      File[
+        '/usr/bin/omegaup-runner',
+        '/etc/omegaup/runner/config.json'
+      ],
+      Exec['omegaup-backend'],
+    ],
+    require   => [
       File[
         '/etc/systemd/system/omegaup-runner.service', '/usr/bin/omegaup-runner',
         '/var/lib/omegaup/runner', '/var/log/omegaup/runner.log',
-        '/var/log/omegaup/runner.tracing.json', '/etc/omegaup/runner/config.json'
+        '/var/log/omegaup/runner.tracing.json', '/etc/omegaup/runner/config.json',
+        '/var/lib/omegajail/bin/omegajail'
       ],
       Omegaup::Certmanager::Cert['/etc/omegaup/runner/key.pem'],
     ],

@@ -79,10 +79,17 @@ class omegaup::services::grader (
     content => template('omegaup/grader/omegaup-grader.service.erb'),
   }
   service { 'omegaup-grader':
-    ensure   => $services_ensure,
-    enable   => true,
-    provider => 'systemd',
-    require  => [
+    ensure    => $services_ensure,
+    enable    => true,
+    provider  => 'systemd',
+    subscribe => [
+      File[
+        '/usr/bin/omegaup-grader',
+        '/etc/omegaup/grader/config.json'
+      ],
+      Exec['omegaup-backend'],
+    ],
+    require   => [
       File[
         '/etc/systemd/system/omegaup-grader.service',
         '/var/lib/omegaup/input', '/var/lib/omegaup/cache',

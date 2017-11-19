@@ -48,10 +48,17 @@ class omegaup::services::broadcaster (
     group  => 'root',
   }
   service { 'omegaup-broadcaster':
-    ensure   => $services_ensure,
-    enable   => true,
-    provider => 'systemd',
-    require  => [
+    ensure    => $services_ensure,
+    enable    => true,
+    provider  => 'systemd',
+    subscribe => [
+      File[
+        '/usr/bin/omegaup-broadcaster',
+        '/etc/omegaup/broadcaster/config.json'
+      ],
+      Exec['omegaup-backend'],
+    ],
+    require   => [
       File[
         '/etc/systemd/system/omegaup-broadcaster.service',
         '/usr/bin/omegaup-broadcaster',
