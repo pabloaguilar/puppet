@@ -22,11 +22,12 @@ class omegaup::services::grader (
     ensure => installed,
   }
   remote_file { '/usr/share/java/libinteractive.jar':
-    source  => 'https://github.com/omegaup/libinteractive/releases/download/v2.0.19/libinteractive.jar',
-    mode    => 0644,
-    owner   => 'root',
-    group   => 'root',
-    require => Package['openjdk-8-jre-headless'],
+    url      => 'https://github.com/omegaup/libinteractive/releases/download/v2.0.20/libinteractive.jar',
+    sha1hash => 'd12d170c7b785fbb8a96c6234bd92ef808f24e5d',
+    mode     => 644,
+    owner    => 'root',
+    group    => 'root',
+    require  => Package['openjdk-8-jre-headless'],
   }
 
   # Configuration
@@ -86,11 +87,11 @@ class omegaup::services::grader (
         '/etc/systemd/system/omegaup-grader.service',
         '/var/lib/omegaup/input', '/var/lib/omegaup/cache',
         '/var/lib/omegaup/grade', '/var/log/omegaup/service.log',
-        '/usr/share/java/libinteractive.jar',
         '/usr/bin/omegaup-grader',
         '/var/log/omegaup/tracing.json',
         '/etc/omegaup/grader/config.json'
       ],
+      Remote_File['/usr/share/java/libinteractive.jar'],
       Omegaup::Certmanager::Cert['/etc/omegaup/grader/key.pem'],
       Package['libhttp-parser2.1', 'libssh2-1'],
     ],
