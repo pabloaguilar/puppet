@@ -198,6 +198,84 @@ class omegaup (
     },
   }
 
+  # Documentation
+  file { '/var/www/omegaup.com/docs':
+    ensure => 'directory',
+    require => [
+      File['/var/www/omegaup.com'],
+    ],
+  }
+  remote_file { '/var/lib/omegaup/cppreference.tar.gz':
+    url      => 'http://upload.cppreference.com/mwiki/images/3/37/html_book_20170409.tar.gz',
+    sha1hash => '4708fb287544e8cfd9d6be56264384016976df94',
+    mode     => 644,
+    owner    => 'root',
+    group    => 'root',
+    notify   => Exec['extract-cppreference'],
+    require  => File['/var/lib/omegaup'],
+  }
+  file { '/var/www/omegaup.com/docs/cpp':
+    ensure => 'directory',
+    owner   => 'www-data',
+    group   => 'www-data',
+    require => [
+      User['www-data'],
+      File['/var/www/omegaup.com/docs'],
+    ],
+  }
+  exec { 'extract-cppreference':
+    command     => '/bin/tar -xf /var/lib/omegaup/cppreference.tar.gz --group=omegaup-www --owner=omegaup-www --strip-components=1 --directory=/var/www/omegaup.com/docs/cpp reference',
+    user        => 'root',
+    require     => [
+      Remote_File['/var/lib/omegaup/cppreference.tar.gz'],
+      File['/var/www/omegaup.com/docs/cpp'],
+      User['www-data'],
+    ],
+    refreshonly => true,
+  }
+  remote_file { '/var/lib/omegaup/freepascal-doc.tar.gz':
+    url      => 'ftp://ftp.hu.freepascal.org/pub/fpc/dist/3.0.2/docs/doc-html.tar.gz',
+    sha1hash => 'b9b9dc3d624d3dd2699e008aa10bd0181d2bda77',
+    mode     => 644,
+    owner    => 'root',
+    group    => 'root',
+    notify   => Exec['extract-freepascal-doc'],
+    require  => File['/var/lib/omegaup'],
+  }
+  file { '/var/www/omegaup.com/docs/pas':
+    ensure => 'directory',
+    owner   => 'www-data',
+    group   => 'www-data',
+    require => [
+      User['www-data'],
+      File['/var/www/omegaup.com/docs'],
+    ],
+  }
+  file { '/var/www/omegaup.com/docs/pas/en':
+    ensure => 'directory',
+    owner   => 'www-data',
+    group   => 'www-data',
+    require => [
+      User['www-data'],
+      File['/var/www/omegaup.com/docs/pas'],
+    ],
+  }
+  exec { 'extract-freepascal-doc':
+    command     => '/bin/tar -xf /var/lib/omegaup/freepascal-doc.tar.gz --group=omegaup-www --owner=omegaup-www --strip-components=1 --directory=/var/www/omegaup.com/docs/pas/en doc',
+    user        => 'root',
+    require     => [
+      Remote_File['/var/lib/omegaup/freepascal-doc.tar.gz'],
+      File['/var/www/omegaup.com/docs/pas/en'],
+      User['www-data'],
+    ],
+    refreshonly => true,
+  }
+  file { '/var/www/omegaup.com/docs/pas/en/index.html':
+    ensure  => 'link',
+    target  => 'fpctoc.html',
+    require => Exec['extract-freepascal-doc'],
+  }
+
   # PHP
   class { '::php':
     ensure       => latest,
