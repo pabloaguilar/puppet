@@ -2,6 +2,7 @@
 class omegaup::services::webhook (
   $services_ensure = running,
   $webhook_secret = undef,
+  $oauth_token = undef,
 ) {
   include omegaup::users
 
@@ -40,6 +41,13 @@ class omegaup::services::webhook (
     group   => 'root',
     mode    => '0755',
   }
+  file { '/var/lib/omegaup/webhook':
+    ensure  => 'directory',
+    owner   => 'omegaup-deploy',
+    group   => 'omegaup-deploy',
+    mode    => '0755',
+    require => [User['omegaup-deploy'], File['/var/lib/omegaup']],
+  }
 
   # Service
   file { '/etc/systemd/system/omegaup-webhook.service':
@@ -51,14 +59,17 @@ class omegaup::services::webhook (
     require => File['/usr/bin/omegaup-webhook'],
   }
   service { 'omegaup-webhook':
-    ensure   => $services_ensure,
-    enable   => true,
-    provider => 'systemd',
-    require  => File['/etc/systemd/system/omegaup-webhook.service',
-                     '/usr/bin/omegaup-webhook',
-                     '/usr/bin/omegaup-deploy-latest',
-                     '/etc/sudoers.d/omegaup-deploy',
-                     '/etc/omegaup/webhook/config.json'],
+    ensure    => $services_ensure,
+    enable    => true,
+    provider  => 'systemd',
+    subscribe => File['/usr/bin/omegaup-webhook',
+                      '/etc/omegaup/webhook/config.json'],
+    require   => File['/etc/systemd/system/omegaup-webhook.service',
+                      '/usr/bin/omegaup-webhook',
+                      '/usr/bin/omegaup-deploy-latest',
+                      '/etc/sudoers.d/omegaup-deploy',
+                      '/etc/omegaup/webhook/config.json',
+                      '/var/lib/omegaup/webhook'],
   }
 }
 
