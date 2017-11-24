@@ -7,26 +7,32 @@ import json
 import logging
 import os
 import re
+import signal
 import subprocess
 import threading
+import urllib
 
-_SECRET = None
-_TOKEN = None
-_QUEUE = []
-_CONDITION = threading.Condition()
 _COMMIT_RE = re.compile('^/([0-9a-f]{2})([0-9a-f]{38})$')
+_GITHUB_SECRET = None
+_GITHUB_TOKEN = None
+_HOSTNAME = None
+_SLACK_WEBHOOK_URL = None
 _WEBHOOK_ROOT = '/var/lib/omegaup/webhook'
 
+_CONDITION = threading.Condition()
+_HTTP_SERVER = None
+_QUEUE = []
 
-def _report_status(commit, state, description):
+
+def _github_report_status(commit, state, description):
     payload = json.dumps({
         'state': state,
-        'target_url': 'https://sandbox.omegaup.com/webhook/%s' % commit,
+        'target_url': 'https://%s/webhook/%s' % (_HOSTNAME, commit),
         'description': description,
-        'context': 'deployment/sandbox/push'
+        'context': 'deployment/%s/push' % (_HOSTNAME,)
     }).encode('utf-8')
     headers = {
-        'Authorization': 'token %s' % _TOKEN,
+        'Authorization': 'token %s' % _GITHUB_TOKEN,
         'Content-Type': 'application/json; charset=utf-8',
         'Content-Length': str(len(payload)),
         'User-Agent': 'omegaup-webhook',
@@ -44,12 +50,65 @@ def _report_status(commit, state, description):
         conn.close()
 
 
+def _slack_report_status(commit, state):
+    _COLOR_MAPPING = {
+        'success': 'good',
+        'failure': 'danger'
+    }
+    format_args = {
+        'commit': commit,
+        'short_commit': commit[:8],
+        'hostname': _HOSTNAME,
+        'state': state,
+    }
+    payload = json.dumps({
+        'attachments': [{
+            'fallback': ('Deployment of commit {short_commit} on {hostname}: '
+                         '{state}').format_map(format_args),
+            'text': ('Deployment finished on {hostname}: '
+                     '{state}').format_map(format_args),
+            'fields': [
+                {
+                    'title': 'Commit',
+                    'value': '<https://github.com/omegaup/omegaup/commit/{commit}|{short_commit}>'.format_map(
+                        format_args),
+                    'short': True
+                },
+                {
+                    'title': 'Logs',
+                    'value': '<https://{hostname}/webhook/{commit}|View>'.format_map(
+                        format_args),
+                    'short': True
+                },
+            ],
+            'color': _COLOR_MAPPING.get(state, 'danger')
+        }]
+    }).encode('utf-8')
+    headers = {
+        'Content-Type': 'application/json',
+        'Content-Length': str(len(payload)),
+        'User-Agent': 'omegaup-webhook',
+        'Connection': 'close',
+    }
+    url = urllib.parse.urlparse(_SLACK_WEBHOOK_URL)
+    conn = http.client.HTTPSConnection(url.hostname, 443)
+    try:
+        conn.request('POST', url.path, payload, headers)
+        response = conn.getresponse()
+        logging.info('Response: Status %d %s. Contents: %r', response.status,
+                     response.reason, response.read())
+    except http.client.HTTPException:
+        logging.exception('Failed to send slack status for commit %s', commit)
+    finally:
+        conn.close()
+
+
 class GitHubWebhookHandler(http.server.BaseHTTPRequestHandler):
     def do_POST(self):
         try:
             content_len = int(self.headers.get('Content-Length', 0))
             raw_payload = self.rfile.read(content_len)
-            expected_hmac = 'sha1=%s' % hmac.new(_SECRET, raw_payload,
+            expected_hmac = 'sha1=%s' % hmac.new(_GITHUB_SECRET, raw_payload,
                                                  digestmod='sha1').hexdigest()
             if self.headers.get('X-Hub-Signature', '') == expected_hmac:
                 payload = json.loads(str(raw_payload, encoding='utf-8'))
@@ -114,8 +173,15 @@ class DeployThread(threading.Thread):
                     _CONDITION.wait()
 
                 commit = _QUEUE.pop()
+                if commit is None:
+                    logging.info('Received empty commit. Sending shutdown '
+                                 'signal to the server.')
+                    _HTTP_SERVER.shutdown()
+                    logging.info('Terminating deploy loop.')
+                    return
                 logging.info('Deploying %s...', commit)
-                _report_status(commit, 'pending', 'Starting sandbox deployment')
+                _github_report_status(commit, 'pending',
+                                      'Starting deployment on %s' % (_HOSTNAME,))
                 logpath = os.path.join(_WEBHOOK_ROOT, commit[:2],
                                        commit[2:])
                 os.makedirs(os.path.dirname(logpath), exist_ok=True)
@@ -126,31 +192,48 @@ class DeployThread(threading.Thread):
                                           stderr=subprocess.STDOUT)
                 if res.returncode != 0:
                     logging.error('Error calling omegaup-deploy-latest for %s', commit)
-                    _report_status(commit, 'failure', 'Sandbox deployment failed')
+                    _github_report_status(commit, 'failure',
+                                          'Deployment on %s failed' % (_HOSTNAME,))
+                    _slack_report_status(commit, 'failure')
                     continue
 
                 logging.info('Successfully deployed %s', commit)
-                _report_status(commit, 'success', 'Sandbox deployment succeeded')
+                _github_report_status(commit, 'success',
+                                      'Deployment on %s succeeded' % (_HOSTNAME,))
+                _slack_report_status(commit, 'success')
+
+
+def _signal_handler(signum, frame):
+    logging.info('Received signal %d', signum)
+    with _CONDITION:
+        _QUEUE.append(None)
+        _CONDITION.notify()
 
 
 def main():
-    global _SECRET, _TOKEN
+    global _GITHUB_SECRET, _GITHUB_TOKEN, _HOSTNAME, _HTTP_SERVER, _SLACK_WEBHOOK_URL
 
     logging.basicConfig(level=logging.INFO)
 
     with open('/etc/omegaup/webhook/config.json') as config_file:
         config = json.load(config_file)
-        _SECRET = bytes(config['Secret'], encoding='utf-8')
-        _TOKEN = config['OAuthToken']
+        _HOSTNAME = config['Hostname']
+        _GITHUB_SECRET = bytes(config['GitHub']['Secret'], encoding='utf-8')
+        _GITHUB_TOKEN = config['GitHub']['OAuthToken']
+        _SLACK_WEBHOOK_URL = config['Slack']['WebhookURL']
 
     logging.info('Starting the webhook service')
-    t = DeployThread(daemon=True)
-    t.start()
+    deploy_thread = DeployThread(daemon=True)
+    deploy_thread.start()
     server_address = ('localhost', 58517)
     logging.info('Listening on %r' % (server_address,))
-    httpd = http.server.HTTPServer(server_address, GitHubWebhookHandler)
+    _HTTP_SERVER = http.server.HTTPServer(server_address, GitHubWebhookHandler)
 
-    httpd.serve_forever()
+    signal.signal(signal.SIGHUP, _signal_handler)
+    signal.signal(signal.SIGTERM, _signal_handler)
+
+    _HTTP_SERVER.serve_forever()
+    deploy_thread.join()
 
 
 if __name__ == '__main__':

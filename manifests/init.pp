@@ -37,6 +37,10 @@ class omegaup (
     require => [File['/var/lib/omegaup'], File['/usr/bin/mkhexdirs'],
                 User['www-data']],
   }
+  exec { 'systemctl daemon-reload':
+    command     => '/bin/systemctl daemon-reload',
+    refreshonly => true,
+  }
 
   # Repository
   file { $root:

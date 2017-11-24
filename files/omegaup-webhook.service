@@ -7,6 +7,7 @@ Type=simple
 User=omegaup-deploy
 Group=omegaup-deploy
 ExecStart=/usr/bin/omegaup-webhook
+ExecReload=/bin/kill -HUP $MAINPID
 Restart=always
 
 [Install]

@@ -1,4 +1,10 @@
 {
-	"OAuthToken": "<%= @oauth_token %>",
-	"Secret": "<%= @webhook_secret %>"
+  "Hostname": "<%= @hostname %>",
+  "GitHub": {
+    "OAuthToken": "<%= @github_oauth_token %>",
+    "Secret": "<%= @github_webhook_secret %>"
+  },
+  "Slack": {
+    "WebhookURL": "<%= @slack_webhook_url %>"
+  }
 }

@@ -1,8 +1,10 @@
 # The omegaUp webhook service.
 class omegaup::services::webhook (
+  $github_oauth_token = undef,
+  $github_webhook_secret = undef,
+  $hostname = undef,
   $services_ensure = running,
-  $webhook_secret = undef,
-  $oauth_token = undef,
+  $slack_webhook_url = undef,
 ) {
   include omegaup::users
 
@@ -57,19 +59,23 @@ class omegaup::services::webhook (
     owner   => 'root',
     group   => 'root',
     require => File['/usr/bin/omegaup-webhook'],
+    notify  => Exec['systemctl daemon-reload'],
   }
   service { 'omegaup-webhook':
-    ensure    => $services_ensure,
-    enable    => true,
-    provider  => 'systemd',
-    subscribe => File['/usr/bin/omegaup-webhook',
-                      '/etc/omegaup/webhook/config.json'],
-    require   => File['/etc/systemd/system/omegaup-webhook.service',
-                      '/usr/bin/omegaup-webhook',
-                      '/usr/bin/omegaup-deploy-latest',
-                      '/etc/sudoers.d/omegaup-deploy',
-                      '/etc/omegaup/webhook/config.json',
-                      '/var/lib/omegaup/webhook'],
+    ensure     => $services_ensure,
+    enable     => true,
+    provider   => 'systemd',
+    hasrestart => true,
+    restart    => '/bin/systemctl reload omegaup-webhook',
+    subscribe  => File['/usr/bin/omegaup-webhook',
+                       '/etc/omegaup/webhook/config.json',
+                       '/etc/systemd/system/omegaup-webhook.service'],
+    require    => File['/etc/systemd/system/omegaup-webhook.service',
+                       '/usr/bin/omegaup-webhook',
+                       '/usr/bin/omegaup-deploy-latest',
+                       '/etc/sudoers.d/omegaup-deploy',
+                       '/etc/omegaup/webhook/config.json',
+                       '/var/lib/omegaup/webhook'],
   }
 }
 
