@@ -1,4 +1,6 @@
-class { '::omegaup::apt_sources': }
+class { '::omegaup::apt_sources':
+  development_environment => true,
+}
 
 class { '::omegaup::database':
   development_environment => true,

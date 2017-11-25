@@ -23,8 +23,9 @@ class { '::omegaup':
   require        => [Class['::omegaup::apt_sources']],
 }
 class { '::omegaup::apt_sources':
-  use_newrelic      => true,
-  use_elastic_beats => true,
+  use_newrelic            => true,
+  use_elastic_beats       => true,
+  development_environment => false,
 }
 
 # Staging repository

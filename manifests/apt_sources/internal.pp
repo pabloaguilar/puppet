@@ -1,6 +1,7 @@
 class omegaup::apt_sources::internal (
-  $use_newrelic,
+  $development_environment,
   $use_elastic_beats,
+  $use_newrelic,
 ) {
   # HHVM
   apt::source { 'hhvm':
@@ -38,6 +39,22 @@ class omegaup::apt_sources::internal (
       key_location => 'https://dl.yarnpkg.com/debian/pubkey.gpg',
       id           => '72ECF46A56B4AD39C907BBB71646B01B86E50310',
     },
+  }
+
+  # Development environment
+  if ($development_environment) {
+    apt::source { 'google-chrome':
+      location       => 'http://dl.google.com/linux/chrome/deb/',
+      release        => 'stable',
+      architecture   => 'amd64',
+      include        => {
+        src          => false,
+      },
+      key            => {
+        key_location => 'https://dl-ssl.google.com/linux/linux_signing_key.pub',
+        id           => '4CCA1EAF950CEE4AB83976DCA040830F7FAC5991'
+      }
+    }
   }
 
   # NewRelic

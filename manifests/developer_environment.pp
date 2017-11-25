@@ -9,7 +9,7 @@ class omegaup::developer_environment (
   package { [ 'vim', 'openssh-client', 'gcc', 'g++', 'python3',
               'clang-format-3.7', 'python-pip', 'python3-six', 'python-six',
               'silversearcher-ag', 'ca-certificates', 'meld', 'vim-gtk',
-              'yarn', 'nodejs' ]:
+              'yarn', 'nodejs']:
     ensure  => present,
   }
   php::extension { 'PHP_CodeSniffer':
@@ -68,6 +68,40 @@ class omegaup::developer_environment (
     ensure => 'directory',
     owner  => $user,
     group  => $user,
+  }
+
+  # Selenium
+  remote_file { '/var/lib/omegaup/chromedriver_linux64.zip':
+    url      => 'https://chromedriver.storage.googleapis.com/2.33/chromedriver_linux64.zip',
+    sha1hash => '717d67ab192b1c57819528161557ce2b66b9436c',
+    mode     => 644,
+    owner    => 'root',
+    group    => 'root',
+    notify   => Exec['chromedriver'],
+    require  => File['/var/lib/omegaup'],
+  }
+  exec { 'chromedriver':
+    command     => '/usr/bin/unzip -o /var/lib/omegaup/chromedriver_linux64.zip chromedriver -d /usr/bin',
+    user        => 'root',
+    refreshonly => true,
+  }
+  package { ['google-chrome-stable', 'python3-selenium', 'python3-pytest', 'firefox']:
+    ensure  => present,
+    require => Apt::Source['google-chrome'],
+  }
+  remote_file { '/var/lib/omegaup/geckodriver_linux64.tar.gz':
+    url      => 'https://github.com/mozilla/geckodriver/releases/download/v0.19.1/geckodriver-v0.19.1-linux64.tar.gz',
+    sha1hash => '9284c82e1a6814ea2a63841cd532d69b87eb0d6e',
+    mode     => 644,
+    owner    => 'root',
+    group    => 'root',
+    notify   => Exec['geckodriver'],
+    require  => File['/var/lib/omegaup'],
+  }
+  exec { 'geckodriver':
+    command     => '/bin/tar -xf /var/lib/omegaup/geckodriver_linux64.tar.gz --group=root --owner=root --directory=/usr/bin geckodriver',
+    user        => 'root',
+    refreshonly => true,
   }
 }
 

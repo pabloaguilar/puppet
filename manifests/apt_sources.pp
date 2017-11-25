@@ -1,6 +1,7 @@
 class omegaup::apt_sources (
-  $use_newrelic      = false,
-  $use_elastic_beats = false,
+  $development_environment = false,
+  $use_elastic_beats       = false,
+  $use_newrelic            = false,
 ) {
   # Stages
   stage { 'init':
@@ -20,9 +21,10 @@ class omegaup::apt_sources (
   Apt::Source <| |> ~> Class['apt::update']
 
   class { '::omegaup::apt_sources::internal':
-    stage             => init,
-    use_newrelic      => use_newrelic,
-    use_elastic_beats => use_elastic_beats,
+    stage                   => init,
+    development_environment => $development_environment,
+    use_newrelic            => $use_newrelic,
+    use_elastic_beats       => $use_elastic_beats,
   }
 }
 
