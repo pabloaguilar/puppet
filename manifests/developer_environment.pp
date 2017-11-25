@@ -85,9 +85,16 @@ class omegaup::developer_environment (
     user        => 'root',
     refreshonly => true,
   }
-  package { ['google-chrome-stable', 'python3-selenium', 'python3-pytest', 'firefox']:
+  package { ['google-chrome-stable', 'python3-pytest', 'firefox']:
     ensure  => present,
     require => Apt::Source['google-chrome'],
+  }
+  package { 'python3-selenium':
+    ensure => absent,
+  }
+  exec { 'selenium':
+    command  => '/usr/bin/pip3 install selenium',
+    creates  => '/usr/local/lib/python3.5/dist-packages/selenium',
   }
   remote_file { '/var/lib/omegaup/geckodriver_linux64.tar.gz':
     url      => 'https://github.com/mozilla/geckodriver/releases/download/v0.19.1/geckodriver-v0.19.1-linux64.tar.gz',
