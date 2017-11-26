@@ -22,8 +22,8 @@ class omegaup::services::grader (
     ensure => installed,
   }
   remote_file { '/usr/share/java/libinteractive.jar':
-    url      => 'https://github.com/omegaup/libinteractive/releases/download/v2.0.20/libinteractive.jar',
-    sha1hash => 'd12d170c7b785fbb8a96c6234bd92ef808f24e5d',
+    url      => 'https://github.com/omegaup/libinteractive/releases/download/v2.0.21/libinteractive.jar',
+    sha1hash => 'f84839ed213258d89c7e565bbbd0c0431516d896',
     mode     => 644,
     owner    => 'root',
     group    => 'root',
