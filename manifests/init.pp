@@ -11,6 +11,7 @@ class omegaup (
   $mysql_host = 'localhost',
   $mysql_password = undef,
   $mysql_user = 'omegaup',
+  $php_max_children = 36,
   $services_ensure = running,
   $ssl = false,
 ) {
@@ -292,9 +293,10 @@ class omegaup (
     },
     fpm_pools     => {
       'www'       => {
-        'listen'       => '/run/php/php7.0-fpm.sock',
-        'listen_owner' => 'www-data',
-        'listen_group' => 'www-data',
+        'listen'          => '/run/php/php7.0-fpm.sock',
+        'listen_owner'    => 'www-data',
+        'listen_group'    => 'www-data',
+        'pm_max_children' => $php_max_children,
       },
     },
     extensions   => {
