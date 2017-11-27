@@ -2,11 +2,19 @@
 class omegaup::services {
   remote_file { '/var/lib/omegaup/omegaup-backend.tar.xz':
     url      => 'https://omegaup-dist.s3.amazonaws.com/omegaup-backend.tar.xz',
-    sha1hash => '65c8f398423de9523bf8ec720fa908ad3a02cb58',
+    sha1hash => 'f9ee58a9f174ab304128970358694b1487945cf4',
     mode     => 644,
     owner    => 'root',
     group    => 'root',
+    notify   => Exec['unlink omegaup-backend'],
     require  => File['/var/lib/omegaup'],
+  }
+
+  exec { 'unlink omegaup-backend':
+    command     => '/bin/rm -f /usr/bin/omegaup-grader /usr/bin/omegaup-runner /usr/bin/omegaup-broadcaster',
+    user        => 'root',
+    notify      => Exec['omegaup-backend'],
+    refreshonly => true,
   }
 
   exec { 'omegaup-backend':
@@ -17,7 +25,6 @@ class omegaup::services {
       '/usr/bin/omegaup-runner',
       '/usr/bin/omegaup-broadcaster'
     ],
-    subscribe   => Remote_File['/var/lib/omegaup/omegaup-backend.tar.xz'],
     refreshonly => true,
   }
 
