@@ -300,6 +300,10 @@ class omegaup (
       },
     },
     extensions   => {
+      apcu         => {
+        provider       => 'apt',
+        package_prefix => 'php-',
+      },
       curl         => {
         provider   => 'apt',
       },
