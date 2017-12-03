@@ -33,7 +33,7 @@ Puppet::Type.type(:config_php).provide(:file, :parent => Puppet::Provider::Confi
 		settings = {}
 		if File.file?(@resource[:path])
 			File.foreach(@resource[:path]) {|line|
-				match = /define\('([a-zA-Z0-9_]+)', '((?:\\'|[^'])*)'\);/.match(line)
+				match = /define\('([a-zA-Z0-9_]+)',\s*'((?:\\'|[^'])*)'\);/.match(line)
 				if match != nil
 					settings[match[1]] = match[2].gsub(/\\\'/, '\'')
 				end
