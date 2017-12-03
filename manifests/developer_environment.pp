@@ -50,14 +50,6 @@ class omegaup::developer_environment (
     path     => "${root}/frontend/server/config.php",
     require  => Config_php['default settings'],
   }
-  config_php { 'experiments schools':
-    ensure   => present,
-    settings => {
-      'EXPERIMENT_SCHOOLS' => 'true', # lint:ignore:quoted_booleans
-    },
-    path     => "${root}/frontend/server/config.php",
-    require  => Config_php['default settings'],
-  }
   file { "${root}/frontend/tests/controllers/omegaup.log":
     ensure => 'file',
     owner  => $user,
