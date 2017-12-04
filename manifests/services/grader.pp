@@ -11,6 +11,7 @@ class omegaup::services::grader (
   $mysql_host = 'localhost',
   $mysql_password = undef,
   $mysql_user = 'omegaup',
+  $root = '/opt/omegaup',
   $services_ensure = running,
 ) {
   include omegaup::users
@@ -27,7 +28,13 @@ class omegaup::services::grader (
     mode     => 644,
     owner    => 'root',
     group    => 'root',
+    notify   => Exec['refresh-libinteractive'],
     require  => Package['openjdk-8-jre-headless'],
+  }
+  exec { 'refresh-libinteractive':
+    command     => "${root}/stuff/refresh_libinteractive.py",
+    require     => [Github[$root]],
+    refreshonly => true,
   }
 
   # Configuration
