@@ -12,6 +12,7 @@ class omegaup (
   $mysql_password = undef,
   $mysql_user = 'omegaup',
   $php_max_children = 36,
+  $php_max_requests = 500,
   $services_ensure = running,
   $ssl = false,
 ) {
@@ -302,6 +303,7 @@ class omegaup (
         'listen_owner'    => 'www-data',
         'listen_group'    => 'www-data',
         'pm_max_children' => $php_max_children,
+        'pm_max_requests' => $php_max_requests,
       },
     },
     extensions   => {
