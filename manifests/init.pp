@@ -153,6 +153,7 @@ class omegaup (
       ssl_dhparam          => "/etc/ssl/private/${hostname}.dhparam",
       index_files          => ['index.php', 'index.html'],
       include_files        => ["${root}/frontend/server/nginx.rewrites"],
+      gzip_types           => 'application/javascript text/html text/css image/x-icon',
       error_pages          => {
         404 => '/404.html',
       },
@@ -163,6 +164,8 @@ class omegaup (
         root                    => "${root}/frontend/www",
         ssl_stapling            => 'on',
         ssl_stapling_verify     => 'on',
+        gzip                    => 'on',
+        expires                 => '7d',
         ssl_trusted_certificate => "/etc/letsencrypt/live/${hostname}/fullchain.pem",
       },
       require              => [File['/etc/nginx/conf.d/default.conf'],
@@ -198,6 +201,8 @@ class omegaup (
     proxy                => undef,
     fastcgi_script       => undef,
     location_cfg_prepend => {
+      gzip                     => 'off',
+      expires                  => '-1',
       fastcgi_param            => 'SCRIPT_FILENAME $document_root$fastcgi_script_name',
       fastcgi_index            => 'index.php',
       fastcgi_keep_conn        => 'on',
