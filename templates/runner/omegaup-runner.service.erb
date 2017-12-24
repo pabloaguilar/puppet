@@ -6,6 +6,8 @@ After=network.target
 Type=simple
 User=omegaup
 Group=omegaup
+PermissionsStartOnly=true
+ExecStartPre=/var/lib/omegajail/bin/omegajail-setup
 ExecStart=/usr/bin/omegaup-runner <%= @runner_flags %>
 WorkingDirectory=/var/lib/omegaup
 Restart=always
