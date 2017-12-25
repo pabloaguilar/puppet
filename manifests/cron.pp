@@ -10,6 +10,10 @@ class omegaup::cron (
 
   cron::daily { 'aggregate_user_feedback':
     command => "${root}/stuff/cron/aggregate_user_feedback.py",
+    ensure  => absent,
+  }
+  cron::daily { 'aggregate_feedback':
+    command => "${root}/stuff/cron/aggregate_feedback.py",
     minute  => 18,
     hour    => 10,
     require => Github[$root],
