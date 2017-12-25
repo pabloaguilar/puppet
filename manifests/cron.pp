@@ -4,6 +4,10 @@ class omegaup::cron (
 ) {
   include cron
 
+  package { ['python3', 'python3-mysqldb']:
+    ensure  => present,
+  }
+
   cron::daily { 'aggregate_user_feedback':
     command => "${root}/stuff/cron/aggregate_user_feedback.py",
     minute  => 18,

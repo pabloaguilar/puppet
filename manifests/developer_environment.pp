@@ -6,7 +6,7 @@ class omegaup::developer_environment (
   $mysql_password,
 ) {
   # Packages
-  package { [ 'vim', 'openssh-client', 'gcc', 'g++', 'python3',
+  package { [ 'vim', 'openssh-client', 'gcc', 'g++',
               'clang-format-3.7', 'python-pip', 'python3-six', 'python-six',
               'silversearcher-ag', 'ca-certificates', 'meld', 'vim-gtk',
               'yarn', 'nodejs']:
