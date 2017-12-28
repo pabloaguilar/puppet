@@ -8,8 +8,8 @@ class omegaup::developer_environment (
   # Packages
   package { [ 'vim', 'openssh-client', 'gcc', 'g++',
               'clang-format-3.7', 'python-pip', 'python3-six', 'python-six',
-              'silversearcher-ag', 'ca-certificates', 'meld', 'vim-gtk',
-              'yarn', 'nodejs']:
+              'python3-pep8', 'pylint3', 'silversearcher-ag',
+              'ca-certificates', 'meld', 'vim-gtk', 'yarn', 'nodejs']:
     ensure  => present,
   }
   php::extension { 'PHP_CodeSniffer':
