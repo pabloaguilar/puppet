@@ -51,7 +51,7 @@ class omegaup::apt_sources::internal (
         src          => false,
       },
       key            => {
-        key_location => 'https://dl-ssl.google.com/linux/linux_signing_key.pub',
+        key_location => 'https://dl.google.com/linux/linux_signing_key.pub',
         id           => '4CCA1EAF950CEE4AB83976DCA040830F7FAC5991'
       }
     }
