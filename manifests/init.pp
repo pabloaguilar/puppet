@@ -310,6 +310,9 @@ class omegaup (
       apcu         => {
         provider       => 'apt',
         package_prefix => 'php-',
+        settings       => {
+          'apc.enable_cli' => 1,
+        },
       },
       curl         => {
         provider   => 'apt',
