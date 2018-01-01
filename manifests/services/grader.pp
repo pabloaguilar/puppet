@@ -70,7 +70,7 @@ class omegaup::services::grader (
     require => File['/var/log/omegaup'],
   }
   file { ['/var/lib/omegaup/input', '/var/lib/omegaup/cache',
-          '/var/lib/omegaup/grade']:
+          '/var/lib/omegaup/grade', '/var/lib/omegaup/ephemeral']:
     ensure  => 'directory',
     owner   => 'omegaup',
     group   => 'omegaup',
