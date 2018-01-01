@@ -4,8 +4,8 @@ class { '::omegaup::apt_sources':
 
 class { '::omegaup::database':
   development_environment => true,
-  root_password           => $mysql_password,
-  password                => $mysql_password,
+  root_password           => 'omegaup',
+  password                => 'omegaup',
 }
 
 class { '::omegaup::certmanager': }
@@ -14,11 +14,16 @@ file { '/etc/omegaup': ensure => 'directory' }
 class { '::omegaup::cron': }
 class { '::omegaup::services': }
 class { '::omegaup::services::grader':
-  mysql_password => $mysql_password,
-  user           => $user,
+  keystore_password => 'omegaup',
+  mysql_password    => 'omegaup',
+  user              => 'ubuntu',
 }
-class { '::omegaup::services::runner': }
-class { '::omegaup::services::broadcaster': }
+class { '::omegaup::services::runner':
+  keystore_password => 'omegaup',
+}
+class { '::omegaup::services::broadcaster':
+  keystore_password => 'omegaup',
+}
 
 omegaup::certmanager::cert { '/etc/omegaup/frontend/certificate.pem':
   hostname => 'localhost',
@@ -33,8 +38,8 @@ file { '/etc/omegaup/frontend':
 class { '::omegaup':
   development_environment => true,
   local_database          => true,
-  mysql_password          => $mysql_password,
-  user                    => $user,
+  mysql_password          => 'omegaup',
+  user                    => 'ubuntu',
   require                 => [Class['::omegaup::database'],
                               Class['::omegaup::apt_sources']],
 }
