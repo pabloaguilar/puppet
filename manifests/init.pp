@@ -1,4 +1,5 @@
 class omegaup (
+  $additional_php_config_settings = {},
   $development_environment = false,
   $root = '/opt/omegaup',
   $user = undef,
@@ -21,7 +22,7 @@ class omegaup (
   include omegaup::directories
 
   # Packages
-  package { ['git', 'curl', 'unzip', 'zip', 'sudo']:
+  package { ['git', 'curl', 'unzip', 'zip', 'sudo', 'python3-pip']:
     ensure  => installed,
   }
 
@@ -98,7 +99,7 @@ class omegaup (
   }
   config_php { 'default settings':
     ensure   => present,
-    settings => {
+    settings => merge({
       'OMEGAUP_DB_USER'                  => $mysql_user,
       'OMEGAUP_DB_HOST'                  => $mysql_host,
       'OMEGAUP_DB_PASS'                  => $mysql_password,
@@ -109,7 +110,7 @@ class omegaup (
       'OMEGAUP_GRADER_BROADCAST_URL'     => "${grader_host}/broadcast/",
       'OMEGAUP_GRADER_RELOAD_CONFIG_URL' => "${grader_host}/reload-config/",
       'OMEGAUP_GRADER_STATUS_URL'        => "${grader_host}/grader/status/",
-    },
+    }, $additional_php_config_settings),
     path     => "${root}/frontend/server/config.php",
     owner    => $user,
     group    => $user,
@@ -208,6 +209,11 @@ class omegaup (
       fastcgi_index            => 'index.php',
       fastcgi_keep_conn        => 'on',
     },
+  }
+  exec { 'awscli':
+    command  => '/usr/bin/pip3 install --system --upgrade awscli',
+    creates  => '/usr/local/bin/aws',
+    require  => Package['python3-pip'],
   }
 
   # Documentation
