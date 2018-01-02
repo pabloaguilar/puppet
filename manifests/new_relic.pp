@@ -44,8 +44,9 @@ class omegaup::new_relic (
     so_name            => 'newrelic',
     settings_prefix    => 'newrelic/newrelic',
     settings           => {
-      license          => "\"${license_key}\"",
-      appname          => "\"${hostname}\"",
+      license                              => "\"${license_key}\"",
+      appname                              => "\"${hostname}\"",
+      'browser_monitoring.auto_instrument' => 'false',
     },
   }
 }
