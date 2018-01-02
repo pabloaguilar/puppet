@@ -295,14 +295,23 @@ class omegaup (
   }
 
   # PHP
+  if $development_environment {
+    $php_development_settings = {
+      'PHP/error_reporting' => 'E_ALL',
+      'PHP/display_errors'  => 'On',
+      'PHP/display_startup_errors'  => 'On',
+    }
+  } else {
+    $php_development_settings = {}
+  }
   class { '::php':
     ensure       => latest,
     manage_repos => false,
     fpm          => true,
-    settings     => {
+    settings     => merge({
       'PHP/post_max_size'       => '200M',
       'PHP/upload_max_filesize' => '200M',
-    },
+    }, $php_development_settings),
     fpm_pools     => {
       'www'       => {
         'listen'          => '/run/php/php7.0-fpm.sock',
