@@ -23,7 +23,7 @@ class omegaup::database (
       user     => 'omegaup',
       password => $password,
       host     => 'localhost',
-      grant    => ['SELECT', 'INSERT', 'UPDATE', 'DELETE', 'DROP'],
+      grant    => ['SELECT', 'INSERT', 'UPDATE', 'DELETE', 'DROP', 'ALTER'],
     }
   }
 }
