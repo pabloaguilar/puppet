@@ -85,6 +85,12 @@ class omegaup (
     group   => 'www-data',
     require => File['/var/log/omegaup'],
   }
+  file { '/var/log/omegaup/jserror.log':
+    ensure  => 'file',
+    owner   => 'www-data',
+    group   => 'www-data',
+    require => File['/var/log/omegaup'],
+  }
   file { '/var/www/omegaup.com':
     ensure  => 'link',
     target  => "${root}/frontend/www",
