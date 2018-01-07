@@ -14,6 +14,22 @@ filebeat:
         match: after
     - type: log
       paths:
+        - /var/log/omegaup/csp.log*
+      document_type: omegaup-csp
+      exclude_files: [".gz$"]
+      fields_under_root: true
+      fields:
+        env: <%= @environment %>
+    - type: log
+      paths:
+        - /var/log/omegaup/jserror.log*
+      document_type: omegaup-jserror
+      exclude_files: [".gz$"]
+      fields_under_root: true
+      fields:
+        env: <%= @environment %>
+    - type: log
+      paths:
         - /var/log/nginx/*.access.log*
       document_type: nginx-access
       exclude_files: [".gz$"]
