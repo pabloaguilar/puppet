@@ -11,7 +11,9 @@ class { '::omegaup::database':
 class { '::omegaup::certmanager': }
 file { '/etc/omegaup': ensure => 'directory' }
 
-class { '::omegaup::cron': }
+class { '::omegaup::cron':
+  mysql_password => 'omegaup',
+}
 class { '::omegaup::services': }
 class { '::omegaup::services::grader':
   keystore_password => 'omegaup',

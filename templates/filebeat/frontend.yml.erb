@@ -22,6 +22,14 @@ filebeat:
         env: <%= @environment %>
     - type: log
       paths:
+        - /var/log/omegaup/cron.log*
+      document_type: omegaup-cron
+      exclude_files: [".gz$"]
+      fields_under_root: true
+      fields:
+        env: <%= @environment %>
+    - type: log
+      paths:
         - /var/log/omegaup/jserror.log*
       document_type: omegaup-jserror
       exclude_files: [".gz$"]

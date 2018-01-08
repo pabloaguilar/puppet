@@ -1,4 +1,4 @@
-/var/log/omegaup/omegaup.log /var/log/omegaup/csp.log /var/log/omegaup/jserror.log {
+/var/log/omegaup/omegaup.log /var/log/omegaup/csp.log /var/log/omegaup/jserror.log /var/log/omegaup/cron.log {
   weekly
 	missingok
 	rotate 52
