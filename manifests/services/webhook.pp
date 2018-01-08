@@ -3,6 +3,8 @@ class omegaup::services::webhook (
   $github_oauth_token = undef,
   $github_webhook_secret = undef,
   $hostname = undef,
+  $ssl = undef,
+  $manifest_name = 'frontend',
   $services_ensure = running,
   $slack_webhook_url = undef,
 ) {
@@ -38,7 +40,7 @@ class omegaup::services::webhook (
   }
   file { '/usr/bin/omegaup-deploy-latest':
     ensure  => 'file',
-    source  => 'puppet:///modules/omegaup/omegaup-deploy-latest',
+    content => template('omegaup/webhook/omegaup-deploy-latest.erb'),
     owner   => 'root',
     group   => 'root',
     mode    => '0755',
@@ -76,6 +78,32 @@ class omegaup::services::webhook (
                        '/etc/sudoers.d/omegaup-deploy',
                        '/etc/omegaup/webhook/config.json',
                        '/var/lib/omegaup/webhook'],
+  }
+
+  # Webhook endpoint
+  if $hostname != undef and $ssl != undef {
+    nginx::resource::location { 'omegaup-org-webhook':
+      ensure                => present,
+      server                => $ssl ? {
+        true                => "${hostname}-ssl",
+        true                => $hostname,
+      },
+      ssl                   => $ssl,
+      ssl_only              => $ssl,
+      location              => '/webhook',
+      proxy                 => 'http://localhost:58517',
+      proxy_read_timeout    => '90',
+      proxy_connect_timeout => '90',
+      proxy_set_header      => [
+        'Host $host',
+        'X-Real-IP $remote_addr',
+        'X-Forwarded-For $proxy_add_x_forwarded_for',
+        'Proxy ""',
+      ],
+      rewrite_rules         => [
+        '^/webhook/(.*)$ /$1 break',
+      ],
+    }
   }
 }
 
