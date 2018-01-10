@@ -21,6 +21,7 @@ class omegaup::blog (
     default_server => $default_server,
     hostname       => $hostname,
     ssl            => $ssl,
+    try_files      => ['$uri', '$uri/', '/index.php?$args'],
     web_root       => $wp_root,
     require        => Class['::omegaup::apt_sources'],
   }
@@ -47,6 +48,20 @@ class omegaup::blog (
     owner   => 'www-data',
     group   => 'www-data',
     require => [Class['wordpress'], User['www-data']],
+  }
+
+  $nginx_server = $ssl ? {
+    true  => "${hostname}-ssl",
+    false => $hostname,
+  }
+  nginx::resource::location { "${hostname}-wp-ban-php-uploads":
+    ensure               => present,
+    server               => $nginx_server,
+    ssl                  => $ssl,
+    ssl_only             => $ssl,
+    location             => '~* /(?:uploads|files)/.*\.php$',
+    location_deny        => ['all'],
+    index_files          => [],
   }
 }
 

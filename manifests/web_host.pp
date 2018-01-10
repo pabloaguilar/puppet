@@ -2,6 +2,7 @@ define omegaup::web_host(
   $hostname = 'localhost',
   $default_server = true,
   $include_files = [],
+  $try_files = undef,
   $ssl = false,
   $php = true,
   $web_root,
@@ -60,6 +61,7 @@ define omegaup::web_host(
         expires                 => '7d',
         ssl_trusted_certificate => "/etc/letsencrypt/live/${hostname}/fullchain.pem",
       },
+      try_files            => $try_files,
       require              => [File['/etc/nginx/conf.d/default.conf'],
                                Exec["${hostname}.dhparam"]],
     }
@@ -78,6 +80,7 @@ define omegaup::web_host(
       server_cfg_prepend   => {
         root => $web_root,
       },
+      try_files            => $try_files,
       require              => File['/etc/nginx/conf.d/default.conf'],
     }
     nginx::resource::server { "${hostname}-ssl":

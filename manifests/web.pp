@@ -5,6 +5,7 @@ class omegaup::web(
   $include_files = [],
   $php_max_children = 36,
   $php_max_requests = 500,
+  $try_files = undef,
   $services_ensure = running,
   $ssl = false,
   $web_root,
@@ -26,6 +27,7 @@ class omegaup::web(
     include_files  => $include_files,
     hostname       => $hostname,
     ssl            => $ssl,
+    try_files      => $try_files,
     web_root       => $web_root,
   }
 
