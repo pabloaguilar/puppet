@@ -77,7 +77,8 @@ class omegaup::developer_environment (
     user        => 'root',
     refreshonly => true,
   }
-  package { ['google-chrome-stable', 'python3-pytest', 'firefox']:
+  package { ['google-chrome-stable', 'python3-pytest', 'python3-flaky',
+             'firefox']:
     ensure  => present,
     require => Apt::Source['google-chrome'],
   }
