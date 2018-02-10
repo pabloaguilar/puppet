@@ -10,7 +10,7 @@ class omegaup::services::runner (
 
   remote_file { '/var/lib/omegaup/omegajail-xenial-distrib-x86_64.tar.bz2':
     url      => 'https://omegaup-omegajail.s3.amazonaws.com/omegajail-xenial-distrib-x86_64.tar.bz2',
-    sha1hash => 'b2a0082a235f4ab4ac3c05ae90fe5be6f193bbfa',
+    sha1hash => '7f49dd03bc186828a51776fdb126d91459638dc0',
     mode     => 644,
     owner    => 'root',
     group    => 'root',
