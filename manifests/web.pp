@@ -15,8 +15,9 @@ class omegaup::web(
     ensure => 'directory',
   }
   class { 'nginx':
-    service_ensure => $services_ensure,
-    manage_repo    => false,
+    service_ensure       => $services_ensure,
+    manage_repo          => false,
+    worker_rlimit_nofile => 8192,
   }
   file { '/etc/nginx/conf.d/default.conf':
     ensure  => absent,
