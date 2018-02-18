@@ -25,7 +25,7 @@ class { '::omegaup':
   development_environment => true,
   local_database          => true,
   mysql_password          => 'omegaup',
-  user                    => 'ubuntu',
+  user                    => 'vagrant',
   require                 => [Class['::omegaup::database'],
                               Class['::omegaup::apt_sources']],
 }
@@ -40,7 +40,7 @@ class { '::omegaup::services':
 class { '::omegaup::services::grader':
   keystore_password => 'omegaup',
   mysql_password    => 'omegaup',
-  user              => 'ubuntu',
+  user              => 'vagrant',
   require           => Class['::omegaup::services'],
 }
 class { '::omegaup::services::runner':
