@@ -11,22 +11,6 @@ class { '::omegaup::database':
 class { '::omegaup::certmanager': }
 file { '/etc/omegaup': ensure => 'directory' }
 
-class { '::omegaup::cron':
-  mysql_password => 'omegaup',
-}
-class { '::omegaup::services': }
-class { '::omegaup::services::grader':
-  keystore_password => 'omegaup',
-  mysql_password    => 'omegaup',
-  user              => 'ubuntu',
-}
-class { '::omegaup::services::runner':
-  keystore_password => 'omegaup',
-}
-class { '::omegaup::services::broadcaster':
-  keystore_password => 'omegaup',
-}
-
 omegaup::certmanager::cert { '/etc/omegaup/frontend/certificate.pem':
   hostname => 'localhost',
   owner    => 'www-data',
@@ -45,5 +29,28 @@ class { '::omegaup':
   require                 => [Class['::omegaup::database'],
                               Class['::omegaup::apt_sources']],
 }
+
+class { '::omegaup::cron':
+  mysql_password => 'omegaup',
+  require        => Class['::omegaup'],
+}
+class { '::omegaup::services':
+  require        => Class['::omegaup'],
+}
+class { '::omegaup::services::grader':
+  keystore_password => 'omegaup',
+  mysql_password    => 'omegaup',
+  user              => 'ubuntu',
+  require           => Class['::omegaup::services'],
+}
+class { '::omegaup::services::runner':
+  keystore_password => 'omegaup',
+  require           => Class['::omegaup::services'],
+}
+class { '::omegaup::services::broadcaster':
+  keystore_password => 'omegaup',
+  require           => Class['::omegaup::services'],
+}
+
 
 # vim:expandtab ts=2 sw=2
