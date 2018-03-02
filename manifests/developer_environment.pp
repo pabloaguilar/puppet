@@ -3,6 +3,7 @@ class omegaup::developer_environment (
   $user,
   $mysql_host,
   $mysql_user,
+  $mysql_db,
   $mysql_password,
 ) {
   # Packages
@@ -102,6 +103,29 @@ class omegaup::developer_environment (
     command     => '/bin/tar -xf /var/lib/omegaup/geckodriver_linux64.tar.gz --group=root --owner=root --directory=/usr/bin geckodriver',
     user        => 'root',
     refreshonly => true,
+  }
+
+  # phpminiadmin
+  file { "${root}/frontend/www/phpminiadmin":
+    ensure  => 'directory',
+    owner   => $user,
+    group   => $user,
+    require => Github[$root],
+  }
+  remote_file { "${root}/frontend/www/phpminiadmin/index.php":
+    url      => 'https://raw.githubusercontent.com/osalabs/phpminiadmin/f0a35497e8a29dea595a13987d82eabc1e830d0b/phpminiadmin.php',
+    sha1hash => '22d69c7336977cf7b20413d373ede57507c0caaa',
+    mode     => '644',
+    owner    => $user,
+    group    => $user,
+    require  => File["${root}/frontend/www/phpminiadmin"],
+  }
+  file { "${root}/frontend/www/phpminiadmin/phpminiconfig.php":
+    content => template('omegaup/developer_environment/phpminiconfig.php.erb'),
+    mode    => '644',
+    owner   => $user,
+    group   => $user,
+    require => File["${root}/frontend/www/phpminiadmin"],
   }
 }
 

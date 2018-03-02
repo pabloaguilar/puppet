@@ -235,6 +235,7 @@ class omegaup (
       user           => $user,
       mysql_host     => $mysql_host,
       mysql_user     => $mysql_user,
+      mysql_db       => 'omegaup',
       mysql_password => $mysql_password,
       require        => [Github[$root]],
     }
