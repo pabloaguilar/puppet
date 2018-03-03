@@ -1,9 +1,19 @@
-/var/log/omegaup/omegaup.log /var/log/omegaup/csp.log /var/log/omegaup/jserror.log /var/log/omegaup/cron.log {
-  weekly
+/var/log/omegaup/omegaup.log /var/log/omegaup/csp.log /var/log/omegaup/jserror.log {
+	weekly
 	missingok
 	rotate 52
 	compress
 	delaycompress
 	dateext
 	create 0644 www-data www-data
+}
+
+/var/log/omegaup/cron.log {
+	weekly
+	missingok
+	rotate 52
+	compress
+	delaycompress
+	dateext
+	create 0644 omegaup-cron omegaup-cron
 }
