@@ -9,7 +9,7 @@ class omegaup::developer_environment (
   # Packages
   package { [ 'vim', 'openssh-client', 'gcc', 'g++',
               'clang-format-3.7', 'python-pip', 'python3-six', 'python-six',
-              'python3-pep8', 'pylint3', 'silversearcher-ag',
+              'python3-pep8', 'pylint3', 'silversearcher-ag', 'libgconf-2-4',
               'ca-certificates', 'meld', 'vim-gtk', 'yarn', 'nodejs']:
     ensure  => present,
   }
