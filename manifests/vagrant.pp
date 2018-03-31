@@ -52,5 +52,4 @@ class { '::omegaup::services::broadcaster':
   require           => Class['::omegaup::services'],
 }
 
-
 # vim:expandtab ts=2 sw=2

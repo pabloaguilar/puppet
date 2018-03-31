@@ -45,6 +45,11 @@ Puppet::Type.newtype(:github) do
     defaultto 'master'
   end
 
+  newparam(:remotes) do
+    desc "Any additional remotes"
+    defaultto {}
+  end
+
   newparam(:owner) do
     desc "The file's owner"
     isrequired

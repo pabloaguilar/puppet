@@ -4,6 +4,7 @@ class omegaup (
   $development_environment = false,
   $github_ensure = present,
   $github_repo = 'omegaup/omegaup',
+  $github_remotes = {},
   $grader_host = 'https://localhost:21680',
   $hostname = 'localhost',
   $local_database = false,
@@ -53,6 +54,7 @@ class omegaup (
     repo    => $github_repo,
     owner   => $user,
     group   => $user,
+    remotes => $github_remotes,
     require => [File[$root], Package['git']],
   }
   file { "${root}/.git/hooks/pre-push":
