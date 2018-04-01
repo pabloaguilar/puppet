@@ -49,7 +49,7 @@ Puppet::Type.type(:github).provide(:git, :parent => Puppet::Provider::GitHub) do
         if !Pathname(@resource[:path]).join('.git/remotes/refs').join(name).directory?
           execute([command(:git), 'remote', 'add', name,
                    "https://github.com/#{repo}.git"],
-                  { :failonfail => true, :uid => uid, :gid => gid })
+                  { :failonfail => false, :uid => uid, :gid => gid })
         end
         execute([command(:git), 'fetch', '-q', name],
                 { :failonfail => true, :uid => uid, :gid => gid })
