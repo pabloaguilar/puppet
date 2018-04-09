@@ -11,7 +11,7 @@ Puppet::Type.type(:github).provide(:git, :parent => Puppet::Provider::GitHub) do
       return false
     end
     Dir.chdir(@resource[:path]) do
-      @resource[:remotes].each do |name, repo|
+      @resource[:remotes].to_h.each do |name, repo|
         if !Pathname(@resource[:path]).join('.git/remotes/refs').join(name).directory?
           return false
         end
@@ -32,7 +32,7 @@ Puppet::Type.type(:github).provide(:git, :parent => Puppet::Provider::GitHub) do
       if head != fetch_head
         return false
       end
-      @resource[:remotes].each do |name, repo|
+      @resource[:remotes].to_h.each do |name, repo|
         if !Pathname(@resource[:path]).join('.git/remotes/refs').join(name).directory?
           return false
         end
@@ -45,7 +45,7 @@ Puppet::Type.type(:github).provide(:git, :parent => Puppet::Provider::GitHub) do
     Dir.chdir(@resource[:path]) do
       execute([command(:git), 'submodule', 'update', '--init', '--recursive'],
              { :failonfail => true, :uid => uid, :gid => gid })
-      @resource[:remotes].each do |name, repo|
+      @resource[:remotes].to_h.each do |name, repo|
         if !Pathname(@resource[:path]).join('.git/remotes/refs').join(name).directory?
           execute([command(:git), 'remote', 'add', name,
                    "https://github.com/#{repo}.git"],
